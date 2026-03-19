@@ -8,6 +8,7 @@
 
 - 面向 `Service` 的现代化 SDK 结构（`client.Free` / `client.Bazi` / `client.Divination`）
 - 统一请求入口、统一错误模型、统一响应结构
+- 返回数据优先使用结构体建模（复杂嵌套字段使用 `json.RawMessage` 过渡）
 - 支持 `context.Context`、自定义 `http.Client`、可配置 Base URL
 - 前期内置关键接口：
   - 免费：账户查询、调用查询
