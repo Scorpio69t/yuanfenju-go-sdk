@@ -99,3 +99,5 @@ sequenceDiagram
 - 增加重试策略、签名策略、可观测性（日志/trace hook）
 
 更多设计细节见：[`docs/design.md`](docs/design.md)
+- 全接口实施路线：[`docs/full-coverage-roadmap.md`](docs/full-coverage-roadmap.md)
+
