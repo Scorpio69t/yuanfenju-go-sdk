@@ -2,7 +2,6 @@ package yuanfenju
 
 import (
 	"context"
-	"encoding/json"
 	"net/url"
 )
 
@@ -23,9 +22,22 @@ func (r MeiriRequest) toValues() url.Values {
 }
 
 type MeiriData struct {
-	Number      int             `json:"number"`
-	GuaMing     string          `json:"guaming"`
-	Description json.RawMessage `json:"description"`
+	Number      int              `json:"number"`
+	GuaMing     string           `json:"guaming"`
+	Description MeiriDescription `json:"description"`
+}
+
+type MeiriDescription struct {
+	GuaYue  string `json:"卦曰"`
+	JieYue  string `json:"解曰"`
+	XiongJi string `json:"凶吉"`
+	YunShi  string `json:"运势"`
+	CaiFu   string `json:"财富"`
+	GanQing string `json:"感情"`
+	ShiYe   string `json:"事业"`
+	ShenTi  string `json:"身体"`
+	ShenGui string `json:"神鬼"`
+	XingRen string `json:"行人"`
 }
 
 func (s *DivinationService) Meiri(ctx context.Context, req MeiriRequest) (*CommonResponse[MeiriData], error) {

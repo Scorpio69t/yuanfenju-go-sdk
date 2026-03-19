@@ -11,7 +11,7 @@ import (
 
 func main() {
 	client, err := yuanfenju.NewClient(yuanfenju.Config{
-		APIKey:  "replace_with_your_api_key",
+		APIKey:  "xuLQsnV3f7jqdk8A5sI3jeBtW",
 		Timeout: 10 * time.Second,
 	})
 	if err != nil {

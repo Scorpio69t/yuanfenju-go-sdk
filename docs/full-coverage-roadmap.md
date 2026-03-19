@@ -73,7 +73,7 @@ gantt
 - `path`：`/v1/...`
 - `priority`：P0/P1/P2
 - `status`：todo/in_progress/done
-- `response_typed`：map/typed
+- `response_typed`：typed struct（禁止 map/raw json）
 - `test_status`：none/unit/integration
 
 ### A2. 统一命名规范

@@ -2,6 +2,7 @@ package yuanfenju
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
 )
 
@@ -10,9 +11,56 @@ type FreeService struct {
 }
 
 type QueryMerchantData struct {
-	MerchantType string `json:"merchant_type"`
-	ExpireTime   string `json:"expire_time"`
-	CanUseNum    string `json:"can_use_num"`
+	MerchantType               string `json:"merchant_type"`
+	MerchantEmail              string `json:"merchant_email"`
+	MerchantNickname           string `json:"merchant_nickname"`
+	MerchantRegisterTime       string `json:"merchant_register_time"`
+	MerchantExpireTime         string `json:"merchant_expire_time"`
+	MerchantRemainingCallTimes string `json:"merchant_remaining_call_times"`
+
+	// Deprecated: keep legacy aliases for backward compatibility.
+	ExpireTime string `json:"-"`
+	CanUseNum  string `json:"-"`
+}
+
+func (d *QueryMerchantData) UnmarshalJSON(data []byte) error {
+	type alias QueryMerchantData
+	type payload struct {
+		alias
+		LegacyExpireTime string `json:"expire_time"`
+		LegacyCanUseNum  string `json:"can_use_num"`
+	}
+
+	apply := func(p payload) {
+		*d = QueryMerchantData(p.alias)
+
+		if d.MerchantExpireTime == "" {
+			d.MerchantExpireTime = p.LegacyExpireTime
+		}
+		if d.MerchantRemainingCallTimes == "" {
+			d.MerchantRemainingCallTimes = p.LegacyCanUseNum
+		}
+
+		d.ExpireTime = d.MerchantExpireTime
+		d.CanUseNum = d.MerchantRemainingCallTimes
+	}
+
+	var obj payload
+	if err := json.Unmarshal(data, &obj); err == nil {
+		apply(obj)
+		return nil
+	}
+
+	var arr []payload
+	if err := json.Unmarshal(data, &arr); err != nil {
+		return err
+	}
+	if len(arr) == 0 {
+		*d = QueryMerchantData{}
+		return nil
+	}
+	apply(arr[0])
+	return nil
 }
 
 func (s *FreeService) QueryMerchant(ctx context.Context) (*CommonResponse[QueryMerchantData], error) {

@@ -26,8 +26,8 @@ pie title 当前接口覆盖（初始阶段）
 |---|---|---|---|---|---|---|---|---|
 | free | 账户查询 | QueryMerchant | POST | /v1/Free/querymerchant | P0 | done | typed struct | none |
 | free | 调用查询 | QueryTimes | POST | /v1/Free/querytimes | P0 | done | typed struct | none |
-| bazi | 八字排盘 | Paipan | POST | /v1/Bazi/paipan | P0 | done | typed + raw json | none |
-| zhanbu | 每日一占 | Meiri | POST | /v1/Zhanbu/meiri | P0 | done | typed + raw json | none |
+| bazi | 八字排盘 | Paipan | POST | /v1/Bazi/paipan | P0 | done | typed struct | none |
+| zhanbu | 每日一占 | Meiri | POST | /v1/Zhanbu/meiri | P0 | done | typed struct | none |
 
 ---
 
@@ -67,7 +67,7 @@ pie title 当前接口覆盖（初始阶段）
 
 - `method_name` 必须与 SDK 暴露方法一致（UpperCamelCase）。
 - `path` 必须使用完整路由（如 `/v1/Bazi/paipan`）。
-- `response_typed` 仅允许：`typed struct` / `typed + raw json` / `raw json`。
+- `response_typed` 仅允许：`typed struct`（禁止 map/raw json 动态结构）。
 
 ---
 
