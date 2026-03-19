@@ -65,9 +65,12 @@ flowchart LR
     B --> B2[QueryTimes]
 
     C --> C1[Paipan]
+    C --> C2[Jiuxing]
+    C --> C3[Hehun]
 
     D --> D1[Meiri]
     D --> D2[Xiaoliuren]
+    D --> D3[Zhiwen]
 ```
 
 ## 请求生命周期
@@ -92,8 +95,11 @@ sequenceDiagram
 | Free | `client.Free.QueryMerchant` | `/v1/Free/querymerchant` |
 | Free | `client.Free.QueryTimes` | `/v1/Free/querytimes` |
 | Bazi | `client.Bazi.Paipan` | `/v1/Bazi/paipan` |
+| Bazi | `client.Bazi.Jiuxing` | `/v1/Bazi/jiuxing` |
+| Bazi | `client.Bazi.Hehun` | `/v1/Bazi/hehun` |
 | Divination | `client.Divination.Meiri` | `/v1/Zhanbu/meiri` |
 | Divination | `client.Divination.Xiaoliuren` | `/v1/Zhanbu/xiaoliuren` |
+| Divination | `client.Divination.Zhiwen` | `/v1/Zhanbu/zhiwen` |
 
 ## 扩展路线
 

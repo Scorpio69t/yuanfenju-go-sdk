@@ -181,6 +181,143 @@ func TestBaziPaipan_HTTPError(t *testing.T) {
 	}
 }
 
+func TestBaziJiuxing_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三"},"jiuxing":{"九星":"文曲星"}}}`
+	client := newTestClient(t, "/v1/Bazi/jiuxing", http.StatusOK, body)
+
+	resp, err := client.Bazi.Jiuxing(context.Background(), BaziJiuxingRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err != nil {
+		t.Fatalf("jiuxing failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.Jiuxing.Jiuxing != "文曲星" {
+		t.Fatalf("unexpected jiuxing response: %#v", resp.Data)
+	}
+}
+
+func TestBaziJiuxing_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/jiuxing", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Jiuxing(context.Background(), BaziJiuxingRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziJiuxing_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/jiuxing", http.StatusBadGateway, `bad gateway`)
+	_, err := client.Bazi.Jiuxing(context.Background(), BaziJiuxingRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 502") {
+		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestBaziHehun_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"male":{"name":"男方"},"female":{"name":"女方"},"minggong":{"score":"30"},"nianqitongzhi":{"score":"20"},"yueling":{"score":"5"},"rigan":{"score":"25"},"tiangan":{"score":"5"},"zinv":{"nannv":"男","score":"15"},"all_score":100}}`
+	client := newTestClient(t, "/v1/Bazi/hehun", http.StatusOK, body)
+
+	resp, err := client.Bazi.Hehun(context.Background(), BaziHehunRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	})
+	if err != nil {
+		t.Fatalf("hehun failed: %v", err)
+	}
+	if resp.Data.AllScore != 100 || resp.Data.Male.Name != "男方" || resp.Data.Female.Name != "女方" {
+		t.Fatalf("unexpected hehun response: %#v", resp.Data)
+	}
+}
+
+func TestBaziHehun_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/hehun", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Hehun(context.Background(), BaziHehunRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziHehun_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/hehun", http.StatusBadRequest, `bad request`)
+	_, err := client.Bazi.Hehun(context.Background(), BaziHehunRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 400") {
+		t.Fatalf("expected http 400 error, got: %v", err)
+	}
+}
+
 func TestDivinationMeiri_Success(t *testing.T) {
 	body := `{"errcode":0,"errmsg":"ok","data":{"number":777,"guaming":"大安","description":{"卦曰":"a"}}}`
 	client := newTestClient(t, "/v1/Zhanbu/meiri", http.StatusOK, body)
@@ -256,5 +393,59 @@ func TestDivinationXiaoliuren_HTTPError(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "http 502") {
 		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestDivinationZhiwen_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"muzhi":"箩纹","shizhi":"箩纹","zhongzhi":"箩纹","wumingzhi":"箩纹","xiaozhi":"箩纹","description":{"分析":"a"}}}`
+	client := newTestClient(t, "/v1/Zhanbu/zhiwen", http.StatusOK, body)
+	resp, err := client.Divination.Zhiwen(context.Background(), ZhiwenRequest{
+		Muzhi:     "0",
+		Shizhi:    "0",
+		Zhongzhi:  "0",
+		Wumingzhi: "0",
+		Xiaozhi:   "0",
+	})
+	if err != nil {
+		t.Fatalf("zhiwen failed: %v", err)
+	}
+	if resp.Data.Muzhi != "箩纹" || resp.Data.Description.Fenxi != "a" {
+		t.Fatalf("unexpected zhiwen response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationZhiwen_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/zhiwen", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Divination.Zhiwen(context.Background(), ZhiwenRequest{
+		Muzhi:     "0",
+		Shizhi:    "0",
+		Zhongzhi:  "0",
+		Wumingzhi: "0",
+		Xiaozhi:   "0",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationZhiwen_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/zhiwen", http.StatusServiceUnavailable, `unavailable`)
+	_, err := client.Divination.Zhiwen(context.Background(), ZhiwenRequest{
+		Muzhi:     "0",
+		Shizhi:    "0",
+		Zhongzhi:  "0",
+		Wumingzhi: "0",
+		Xiaozhi:   "0",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 503") {
+		t.Fatalf("expected http 503 error, got: %v", err)
 	}
 }

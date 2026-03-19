@@ -151,3 +151,101 @@ func TestBaziPaipanRequestValidate(t *testing.T) {
 		})
 	}
 }
+
+func TestBaziJiuxingRequestValidate(t *testing.T) {
+	okReq := BaziJiuxingRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+		Lang:   "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziJiuxingRequest{
+		Sex:    "2",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziJiuxingDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"sex":"坤造","name":"张三","gongli":"a","nongli":"b","qiyun":"c","jiaoyun":"d"},"jiuxing":{"风水命":"四绿木","九星":"文曲星","论命":"x","特性":"y","机会":"z","忠告":"w"}}}`
+	var resp CommonResponse[BaziJiuxingData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal jiuxing data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.Jiuxing.Jiuxing != "文曲星" {
+		t.Fatalf("unexpected jiuxing data: %#v", resp.Data)
+	}
+}
+
+func TestBaziHehunRequestValidate(t *testing.T) {
+	okReq := BaziHehunRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+		Lang:         "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziHehunRequest{
+		MaleType:     "2",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziHehunDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"male":{"name":"男方","bazi":["甲子"]},"female":{"name":"女方","bazi":["乙丑"]},"minggong":{"male_fengshui":"东四命","female_fengshui":"东四命","score":"30","male_minggong":"震","female_minggong":"震","description":"d","detail_description":"dd"},"nianqitongzhi":{"score":"20","male_nian_zhi":"辰","male_nian_zhi_desc":"木","female_nian_zhi":"辰","female_nian_zhi_desc":"木","description":"d","detail_description":"dd"},"yueling":{"score":"5","male_yue_zhi":"亥","female_yue_zhi":"亥","description":"d","detail_description":"dd"},"rigan":{"score":"25","male_yue_zhi":"丁","female_yue_zhi":"丁","description":"d","detail_description":"dd"},"tiangan":{"score":"5","male_yue_zhi":"丁","female_yue_zhi":"丁","description":"d","detail_description":"dd"},"zinv":{"nannv":"男","score":"15","description":"d","detail_description":"dd"},"all_score":100,"male_sx":"龙","female_sx":"龙","male_xz":"天蝎座","female_xz":"天蝎座"}}`
+	var resp CommonResponse[BaziHehunData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal hehun data failed: %v", err)
+	}
+	if resp.Data.AllScore != 100 || resp.Data.Male.Name != "男方" || resp.Data.Zinv.Nannv != "男" {
+		t.Fatalf("unexpected hehun data: %#v", resp.Data)
+	}
+}

@@ -87,6 +87,76 @@ type XiaoliurenData struct {
 	Description MeiriDescription `json:"description"`
 }
 
+type ZhiwenRequest struct {
+	Muzhi     string // 0 箩纹，1 簸箕纹
+	Shizhi    string // 0 箩纹，1 簸箕纹
+	Zhongzhi  string // 0 箩纹，1 簸箕纹
+	Wumingzhi string // 0 箩纹，1 簸箕纹
+	Xiaozhi   string // 0 箩纹，1 簸箕纹
+}
+
+func (r ZhiwenRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Muzhi != "" {
+		v.Set("muzhi", r.Muzhi)
+	}
+	if r.Shizhi != "" {
+		v.Set("shizhi", r.Shizhi)
+	}
+	if r.Zhongzhi != "" {
+		v.Set("zhongzhi", r.Zhongzhi)
+	}
+	if r.Wumingzhi != "" {
+		v.Set("wumingzhi", r.Wumingzhi)
+	}
+	if r.Xiaozhi != "" {
+		v.Set("xiaozhi", r.Xiaozhi)
+	}
+	return v
+}
+
+func (r ZhiwenRequest) Validate() error {
+	allowed := []string{"0", "1"}
+	required := []struct {
+		field string
+		value string
+	}{
+		{"muzhi", r.Muzhi},
+		{"shizhi", r.Shizhi},
+		{"zhongzhi", r.Zhongzhi},
+		{"wumingzhi", r.Wumingzhi},
+		{"xiaozhi", r.Xiaozhi},
+	}
+	for _, x := range required {
+		if x.value == "" {
+			return newRequiredFieldError(x.field)
+		}
+		if !inSet(x.value, allowed) {
+			return newEnumFieldError(x.field, x.value, allowed)
+		}
+	}
+	return nil
+}
+
+type ZhiwenData struct {
+	Muzhi       string            `json:"muzhi"`
+	Shizhi      string            `json:"shizhi"`
+	Zhongzhi    string            `json:"zhongzhi"`
+	Wumingzhi   string            `json:"wumingzhi"`
+	Xiaozhi     string            `json:"xiaozhi"`
+	Description ZhiwenDescription `json:"description"`
+}
+
+type ZhiwenDescription struct {
+	Fenxi    string `json:"分析"`
+	Shiyue   string `json:"诗曰"`
+	Xingge   string `json:"性格"`
+	Hunyin   string `json:"婚姻"`
+	Zhiye    string `json:"职业"`
+	Jiankang string `json:"健康"`
+	Yunshi   string `json:"运势"`
+}
+
 func (s *DivinationService) Meiri(ctx context.Context, req MeiriRequest) (*CommonResponse[MeiriData], error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -109,6 +179,21 @@ func (s *DivinationService) Xiaoliuren(ctx context.Context, req XiaoliurenReques
 
 	resp := &CommonResponse[XiaoliurenData]{}
 	if err := s.client.doForm(ctx, "/v1/Zhanbu/xiaoliuren", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *DivinationService) Zhiwen(ctx context.Context, req ZhiwenRequest) (*CommonResponse[ZhiwenData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[ZhiwenData]{}
+	if err := s.client.doForm(ctx, "/v1/Zhanbu/zhiwen", req.toValues(), resp); err != nil {
 		return nil, err
 	}
 	if resp.ErrCode != 0 {
