@@ -101,4 +101,5 @@ sequenceDiagram
 
 更多设计细节见：[`docs/design.md`](docs/design.md)
 - 全接口实施路线：[`docs/full-coverage-roadmap.md`](docs/full-coverage-roadmap.md)
+- 接口台账（实施中）：[`docs/interface-catalog.md`](docs/interface-catalog.md)
 
