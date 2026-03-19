@@ -2,6 +2,7 @@ package yuanfenju
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 )
 
@@ -95,5 +96,58 @@ func TestBaziPaipanDataUnmarshal(t *testing.T) {
 	}
 	if resp.Data.DetailInfo.Sizhu.Day.TG != "丙" || resp.Data.DetailInfo.DayunShensha[0].TGDZ != "丁丑" {
 		t.Fatalf("unexpected detail_info: %#v", resp.Data.DetailInfo)
+	}
+}
+
+func TestBaziPaipanRequestValidate(t *testing.T) {
+	valid := BaziPaipanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1990",
+		Month:  "01",
+		Day:    "01",
+		Hours:  "12",
+		Zhen:   "0",
+		Lang:   "zh-cn",
+		Minute: "00",
+	}
+	if err := valid.Validate(); err != nil {
+		t.Fatalf("expected valid request, got err: %v", err)
+	}
+
+	cases := []struct {
+		name string
+		req  BaziPaipanRequest
+	}{
+		{
+			name: "missing sex",
+			req: BaziPaipanRequest{
+				Type: "1", Year: "1990", Month: "01", Day: "01", Hours: "12",
+			},
+		},
+		{
+			name: "invalid sex",
+			req: BaziPaipanRequest{
+				Sex: "2", Type: "1", Year: "1990", Month: "01", Day: "01", Hours: "12",
+			},
+		},
+		{
+			name: "invalid lang",
+			req: BaziPaipanRequest{
+				Sex: "1", Type: "1", Year: "1990", Month: "01", Day: "01", Hours: "12", Lang: "fr-fr",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.req.Validate()
+			if err == nil {
+				t.Fatal("expected validation error, got nil")
+			}
+			if !errors.Is(err, ErrValidation) {
+				t.Fatalf("expected ErrValidation, got: %v", err)
+			}
+		})
 	}
 }

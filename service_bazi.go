@@ -5,6 +5,13 @@ import (
 	"net/url"
 )
 
+var (
+	baziAllowedSex  = []string{"0", "1"}
+	baziAllowedType = []string{"1", "2"}
+	baziAllowedZhen = []string{"0", "1", "3"}
+	baziAllowedLang = []string{"zh-cn", "zh-tw", "en-us"}
+)
+
 type BaziService struct {
 	client *Client
 }
@@ -73,6 +80,43 @@ func (r BaziPaipanRequest) toValues() url.Values {
 		v.Set("lang", r.Lang)
 	}
 	return v
+}
+
+func (r BaziPaipanRequest) Validate() error {
+	if r.Sex == "" {
+		return newRequiredFieldError("sex")
+	}
+	if !inSet(r.Sex, baziAllowedSex) {
+		return newEnumFieldError("sex", r.Sex, baziAllowedSex)
+	}
+
+	if r.Type == "" {
+		return newRequiredFieldError("type")
+	}
+	if !inSet(r.Type, baziAllowedType) {
+		return newEnumFieldError("type", r.Type, baziAllowedType)
+	}
+
+	if r.Year == "" {
+		return newRequiredFieldError("year")
+	}
+	if r.Month == "" {
+		return newRequiredFieldError("month")
+	}
+	if r.Day == "" {
+		return newRequiredFieldError("day")
+	}
+	if r.Hours == "" {
+		return newRequiredFieldError("hours")
+	}
+
+	if r.Zhen != "" && !inSet(r.Zhen, baziAllowedZhen) {
+		return newEnumFieldError("zhen", r.Zhen, baziAllowedZhen)
+	}
+	if r.Lang != "" && !inSet(r.Lang, baziAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, baziAllowedLang)
+	}
+	return nil
 }
 
 type BaziPaipanData struct {
@@ -187,6 +231,10 @@ type BaziDayunShenshaInfo struct {
 }
 
 func (s *BaziService) Paipan(ctx context.Context, req BaziPaipanRequest) (*CommonResponse[BaziPaipanData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
 	resp := &CommonResponse[BaziPaipanData]{}
 	if err := s.client.doForm(ctx, "/v1/Bazi/paipan", req.toValues(), resp); err != nil {
 		return nil, err
