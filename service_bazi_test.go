@@ -249,3 +249,152 @@ func TestBaziHehunDataUnmarshal(t *testing.T) {
 		t.Fatalf("unexpected hehun data: %#v", resp.Data)
 	}
 }
+
+func TestBaziHepanRequestValidate(t *testing.T) {
+	okReq := BaziHepanRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+		Lang:         "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziHepanRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "2",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziHepanDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"male":{"name":"甲方","bazi":["甲子"]},"female":{"name":"乙方","bazi":["乙丑"]},"minggong":{"score":"10"},"nianqitongzhi":{"score":"20"},"yueling":{"score":"5"},"rigan":{"score":"25"},"tiangan":{"score":"5"},"jiankang":{"score":"10","description":"d","detail_description":"dd"},"all_score":100,"male_sx":"龙","female_sx":"龙","male_xz":"天蝎座","female_xz":"天蝎座"}}`
+	var resp CommonResponse[BaziHepanData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal hepan data failed: %v", err)
+	}
+	if resp.Data.AllScore != 100 || resp.Data.Male.Name != "甲方" || resp.Data.Jiankang.Score != "10" {
+		t.Fatalf("unexpected hepan data: %#v", resp.Data)
+	}
+}
+
+func TestBaziCesuanRequestValidate(t *testing.T) {
+	okReq := BaziCesuanRequest{
+		Sex:       "0",
+		Type:      "1",
+		Year:      "1988",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+		Lang:      "zh-cn",
+		Factor:    "1",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziCesuanRequest{
+		Sex:       "0",
+		Type:      "1",
+		Year:      "1988",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "181",
+		Latitude:  "39.92",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziCesuanDataUnmarshal(t *testing.T) {
+	raw := `{
+		"errcode":0,
+		"errmsg":"ok",
+		"data":{
+			"base_info":{"sex":"坤造","name":"张三","gongli":"a","nongli":"b","qiyun":"c","jiaoyun":"d","zhengge":"伤官格","wuxing_xiji":"喜水"},
+			"bazi_info":{"kw":"戌亥","tg_cg_god":["伤","杀"],"bazi":"戊辰 癸亥 丁卯 丙午","na_yin":"大林木"},
+			"chenggu":{"year_weight":"1.2","month_weight":"1.8","day_weight":"1.6","hour_weight":"1.0","total_weight":"5.6","description":"desc"},
+			"wuxing":{"detail_desc":"先天","simple_desc":"木","simple_description":"后天","detail_description":"详细"},
+			"yinyuan":{"sanshishu_yinyuan":"姻缘文案"},
+			"caiyun":{"sanshishu_caiyun":{"simple_desc":"先苦后甜","detail_desc":"财运详批"}},
+			"sizhu":{"rizhu":"日柱论命"},
+			"mingyun":{"sanshishu_mingyun":"命运批示"},
+			"sx":"龙",
+			"xz":"天蝎座",
+			"xiyongshen":{
+				"qiangruo":"八字偏弱",
+				"xiyongshen":"金，水",
+				"jishen":"水",
+				"xiyongshen_desc":"说明",
+				"jin_number":0,
+				"mu_number":1,
+				"shui_number":2,
+				"huo_number":3,
+				"tu_number":2,
+				"tonglei":"金水",
+				"yilei":"木火土",
+				"rizhu_tiangan":"水",
+				"zidang":0,
+				"yidang":9,
+				"zidang_percent":"0%",
+				"yidang_percent":"100%",
+				"jin_score":75,
+				"mu_score":16,
+				"shui_score":118,
+				"huo_score":36,
+				"tu_score":139,
+				"jin_score_percent":"19.53%",
+				"mu_score_percent":"4.17%",
+				"shui_score_percent":"30.73%",
+				"huo_score_percent":"9.38%",
+				"tu_score_percent":"36.2%",
+				"yinyang":"阴阳平衡"
+			}
+		}
+	}`
+	var resp CommonResponse[BaziCesuanData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal cesuan data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.Caiyun.SanshishuCaiyun.SimpleDesc != "先苦后甜" || resp.Data.Xiyongshen.ShuiScore != 118 {
+		t.Fatalf("unexpected cesuan data: %#v", resp.Data)
+	}
+}

@@ -116,3 +116,28 @@ func TestZhiwenDataUnmarshal(t *testing.T) {
 		t.Fatalf("unexpected zhiwen data: %#v", resp.Data)
 	}
 }
+
+func TestYaoguaRequestValidate(t *testing.T) {
+	if err := (YaoguaRequest{Lang: "zh-tw"}).Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	err := (YaoguaRequest{Lang: "fr-fr"}).Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestYaoguaDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"id":21,"common_desc1":"火雷噬嗑","common_desc2":"象曰","common_desc3":"解卦","shiye":"事业","jingshang":"经商","qiuming":"求名","waichu":"外出","hunlian":"婚恋","juece":"决策","image":"https://yuanfenju.com/Public/img/zhouyi64gua/21.jpg"}}`
+	var resp CommonResponse[YaoguaData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal yaogua data failed: %v", err)
+	}
+	if resp.Data.ID != 21 || resp.Data.CommonDesc1 != "火雷噬嗑" || resp.Data.Image == "" {
+		t.Fatalf("unexpected yaogua data: %#v", resp.Data)
+	}
+}

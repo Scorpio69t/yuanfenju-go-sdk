@@ -8,15 +8,15 @@
 ## 1. 当前进度总览（已录入域）
 
 - 已录入总数：25
-- 已实现：8
+- 已实现：11
 - 进行中：0
-- 待实现：17
+- 待实现：14
 
 ```mermaid
 pie title free/bazi/zhanbu 三域接口覆盖
-    "done" : 8
+    "done" : 11
     "in_progress" : 0
-    "todo" : 17
+    "todo" : 14
 ```
 
 ---
@@ -29,9 +29,9 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | free | 调用查询 | QueryTimes | POST | /v1/Free/querytimes | P0 | done | typed struct | unit |
 | bazi | 九星命理 | Jiuxing | POST | /v1/Bazi/jiuxing | P1 | done | typed struct | unit |
 | bazi | 八字合婚 | Hehun | POST | /v1/Bazi/hehun | P1 | done | typed struct | unit |
-| bazi | 八字合盘 | Hepan | POST | /v1/Bazi/hepan | P1 | todo | typed struct | none |
+| bazi | 八字合盘 | Hepan | POST | /v1/Bazi/hepan | P1 | done | typed struct | unit |
 | bazi | 八字排盘 | Paipan | POST | /v1/Bazi/paipan | P0 | done | typed struct | unit |
-| bazi | 八字测算 | Cesuan | POST | /v1/Bazi/cesuan | P1 | todo | typed struct | none |
+| bazi | 八字测算 | Cesuan | POST | /v1/Bazi/cesuan | P1 | done | typed struct | unit |
 | bazi | 八字精盘 | Jingpan | POST | /v1/Bazi/jingpan | P1 | todo | typed struct | none |
 | bazi | 八字精算 | Jingsuan | POST | /v1/Bazi/jingsuan | P1 | todo | typed struct | none |
 | bazi | 未来运势 | Weilai | POST | /v1/Bazi/weilai | P1 | todo | typed struct | none |
@@ -47,7 +47,7 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | zhanbu | 多牌阵占卜(旧版) | Taluospreads | POST | /v1/Zhanbu/taluospreads | P2 | todo | typed struct | none |
 | zhanbu | 小六壬占卜 | Xiaoliuren | POST | /v1/Zhanbu/xiaoliuren | P1 | done | typed struct | unit |
 | zhanbu | 指纹占卜 | Zhiwen | POST | /v1/Zhanbu/zhiwen | P1 | done | typed struct | unit |
-| zhanbu | 摇卦占卜 | Yaogua | POST | /v1/Zhanbu/yaogua | P1 | todo | typed struct | none |
+| zhanbu | 摇卦占卜 | Yaogua | POST | /v1/Zhanbu/yaogua | P1 | done | typed struct | unit |
 | zhanbu | 每日一占 | Meiri | POST | /v1/Zhanbu/meiri | P0 | done | typed struct | unit |
 | zhanbu | 星座每日运势 | Yunshi | POST | /v1/Zhanbu/yunshi | P1 | todo | typed struct | none |
 | zhanbu | 生肖每日运势 | Shengxiaoyunshi | POST | /v1/Zhanbu/shengxiaoyunshi | P1 | todo | typed struct | none |
@@ -94,6 +94,6 @@ pie title free/bazi/zhanbu 三域接口覆盖
 
 ## 5. 下一步（执行顺序）
 
-1. Batch-1 继续实现：`bazi/hepan`（P1）。
-2. Batch-1 继续实现：`bazi/cesuan`（P1）。
-3. Batch-1 继续实现：`zhanbu/yaogua`（P1）。
+1. Batch-1 继续实现：`bazi/jingpan`（P1）。
+2. Batch-1 继续实现：`bazi/jingsuan`（P1）。
+3. Batch-1 继续实现：`bazi/weilai`（P1）。

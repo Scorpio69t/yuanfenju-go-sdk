@@ -12,8 +12,8 @@
 - 支持 `context.Context`、自定义 `http.Client`、可配置 Base URL
 - 前期内置关键接口：
   - 免费：账户查询、调用查询
-  - 八字：八字排盘
-  - 占卜：每日一占
+  - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算
+  - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜
 
 ## 安装
 
@@ -67,10 +67,13 @@ flowchart LR
     C --> C1[Paipan]
     C --> C2[Jiuxing]
     C --> C3[Hehun]
+    C --> C4[Hepan]
+    C --> C5[Cesuan]
 
     D --> D1[Meiri]
     D --> D2[Xiaoliuren]
     D --> D3[Zhiwen]
+    D --> D4[Yaogua]
 ```
 
 ## 请求生命周期
@@ -97,9 +100,12 @@ sequenceDiagram
 | Bazi | `client.Bazi.Paipan` | `/v1/Bazi/paipan` |
 | Bazi | `client.Bazi.Jiuxing` | `/v1/Bazi/jiuxing` |
 | Bazi | `client.Bazi.Hehun` | `/v1/Bazi/hehun` |
+| Bazi | `client.Bazi.Hepan` | `/v1/Bazi/hepan` |
+| Bazi | `client.Bazi.Cesuan` | `/v1/Bazi/cesuan` |
 | Divination | `client.Divination.Meiri` | `/v1/Zhanbu/meiri` |
 | Divination | `client.Divination.Xiaoliuren` | `/v1/Zhanbu/xiaoliuren` |
 | Divination | `client.Divination.Zhiwen` | `/v1/Zhanbu/zhiwen` |
+| Divination | `client.Divination.Yaogua` | `/v1/Zhanbu/yaogua` |
 
 ## 扩展路线
 

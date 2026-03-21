@@ -7,6 +7,7 @@ import (
 )
 
 var divinationAllowedLang = []string{"zh-cn", "en-us"}
+var yaoguaAllowedLang = []string{"zh-cn", "en-us", "zh-tw"}
 
 type DivinationService struct {
 	client *Client
@@ -157,6 +158,39 @@ type ZhiwenDescription struct {
 	Yunshi   string `json:"运势"`
 }
 
+type YaoguaRequest struct {
+	Lang string // zh-cn / en-us / zh-tw
+}
+
+func (r YaoguaRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r YaoguaRequest) Validate() error {
+	if r.Lang != "" && !inSet(r.Lang, yaoguaAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, yaoguaAllowedLang)
+	}
+	return nil
+}
+
+type YaoguaData struct {
+	ID          int    `json:"id"`
+	CommonDesc1 string `json:"common_desc1"`
+	CommonDesc2 string `json:"common_desc2"`
+	CommonDesc3 string `json:"common_desc3"`
+	Shiye       string `json:"shiye"`
+	Jingshang   string `json:"jingshang"`
+	Qiuming     string `json:"qiuming"`
+	Waichu      string `json:"waichu"`
+	Hunlian     string `json:"hunlian"`
+	Juece       string `json:"juece"`
+	Image       string `json:"image"`
+}
+
 func (s *DivinationService) Meiri(ctx context.Context, req MeiriRequest) (*CommonResponse[MeiriData], error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -194,6 +228,21 @@ func (s *DivinationService) Zhiwen(ctx context.Context, req ZhiwenRequest) (*Com
 
 	resp := &CommonResponse[ZhiwenData]{}
 	if err := s.client.doForm(ctx, "/v1/Zhanbu/zhiwen", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *DivinationService) Yaogua(ctx context.Context, req YaoguaRequest) (*CommonResponse[YaoguaData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[YaoguaData]{}
+	if err := s.client.doForm(ctx, "/v1/Zhanbu/yaogua", req.toValues(), resp); err != nil {
 		return nil, err
 	}
 	if resp.ErrCode != 0 {

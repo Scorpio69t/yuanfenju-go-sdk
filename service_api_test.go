@@ -318,6 +318,152 @@ func TestBaziHehun_HTTPError(t *testing.T) {
 	}
 }
 
+func TestBaziHepan_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"male":{"name":"甲方"},"female":{"name":"乙方"},"minggong":{"score":"10"},"nianqitongzhi":{"score":"20"},"yueling":{"score":"5"},"rigan":{"score":"25"},"tiangan":{"score":"5"},"jiankang":{"score":"10"},"all_score":100}}`
+	client := newTestClient(t, "/v1/Bazi/hepan", http.StatusOK, body)
+
+	resp, err := client.Bazi.Hepan(context.Background(), BaziHepanRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	})
+	if err != nil {
+		t.Fatalf("hepan failed: %v", err)
+	}
+	if resp.Data.AllScore != 100 || resp.Data.Male.Name != "甲方" || resp.Data.Female.Name != "乙方" {
+		t.Fatalf("unexpected hepan response: %#v", resp.Data)
+	}
+}
+
+func TestBaziHepan_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/hepan", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Hepan(context.Background(), BaziHepanRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziHepan_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/hepan", http.StatusBadRequest, `bad request`)
+	_, err := client.Bazi.Hepan(context.Background(), BaziHepanRequest{
+		MaleType:     "1",
+		MaleYear:     "1988",
+		MaleMonth:    "11",
+		MaleDay:      "8",
+		MaleHours:    "12",
+		MaleMinute:   "20",
+		FemaleType:   "1",
+		FemaleYear:   "1988",
+		FemaleMonth:  "11",
+		FemaleDay:    "8",
+		FemaleHours:  "12",
+		FemaleMinute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 400") {
+		t.Fatalf("expected http 400 error, got: %v", err)
+	}
+}
+
+func TestBaziCesuan_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三"},"bazi_info":{"kw":"戌亥"},"chenggu":{"total_weight":"5.6"},"wuxing":{"simple_desc":"木"},"yinyuan":{"sanshishu_yinyuan":"姻缘"},"caiyun":{"sanshishu_caiyun":{"simple_desc":"先苦后甜"}},"sizhu":{"rizhu":"日柱"},"mingyun":{"sanshishu_mingyun":"命运"},"sx":"龙","xz":"天蝎座","xiyongshen":{"shui_score":118}}}`
+	client := newTestClient(t, "/v1/Bazi/cesuan", http.StatusOK, body)
+
+	resp, err := client.Bazi.Cesuan(context.Background(), BaziCesuanRequest{
+		Sex:       "0",
+		Type:      "1",
+		Year:      "1988",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+	})
+	if err != nil {
+		t.Fatalf("cesuan failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.Caiyun.SanshishuCaiyun.SimpleDesc != "先苦后甜" || resp.Data.Xiyongshen.ShuiScore != 118 {
+		t.Fatalf("unexpected cesuan response: %#v", resp.Data)
+	}
+}
+
+func TestBaziCesuan_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/cesuan", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Cesuan(context.Background(), BaziCesuanRequest{
+		Sex:       "0",
+		Type:      "1",
+		Year:      "1988",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziCesuan_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/cesuan", http.StatusBadGateway, `bad gateway`)
+	_, err := client.Bazi.Cesuan(context.Background(), BaziCesuanRequest{
+		Sex:       "0",
+		Type:      "1",
+		Year:      "1988",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 502") {
+		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
 func TestDivinationMeiri_Success(t *testing.T) {
 	body := `{"errcode":0,"errmsg":"ok","data":{"number":777,"guaming":"大安","description":{"卦曰":"a"}}}`
 	client := newTestClient(t, "/v1/Zhanbu/meiri", http.StatusOK, body)
@@ -442,6 +588,42 @@ func TestDivinationZhiwen_HTTPError(t *testing.T) {
 		Wumingzhi: "0",
 		Xiaozhi:   "0",
 	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 503") {
+		t.Fatalf("expected http 503 error, got: %v", err)
+	}
+}
+
+func TestDivinationYaogua_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"id":21,"common_desc1":"火雷噬嗑","common_desc2":"象曰","common_desc3":"解卦","shiye":"事业","jingshang":"经商","qiuming":"求名","waichu":"外出","hunlian":"婚恋","juece":"决策","image":"https://yuanfenju.com/Public/img/zhouyi64gua/21.jpg"}}`
+	client := newTestClient(t, "/v1/Zhanbu/yaogua", http.StatusOK, body)
+	resp, err := client.Divination.Yaogua(context.Background(), YaoguaRequest{Lang: "zh-cn"})
+	if err != nil {
+		t.Fatalf("yaogua failed: %v", err)
+	}
+	if resp.Data.ID != 21 || resp.Data.CommonDesc1 != "火雷噬嗑" {
+		t.Fatalf("unexpected yaogua response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationYaogua_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/yaogua", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Divination.Yaogua(context.Background(), YaoguaRequest{Lang: "zh-cn"})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationYaogua_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/yaogua", http.StatusServiceUnavailable, `unavailable`)
+	_, err := client.Divination.Yaogua(context.Background(), YaoguaRequest{Lang: "zh-cn"})
 	if err == nil {
 		t.Fatal("expected HTTP error, got nil")
 	}
