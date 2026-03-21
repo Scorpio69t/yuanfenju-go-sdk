@@ -648,6 +648,186 @@ func TestBaziWeilai_HTTPError(t *testing.T) {
 	}
 }
 
+func TestBaziZwpan_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三","sex":"坤造","age":36},"gong_pan":[{"minggong":"疾厄宫","tianfuxing":"太阴"}]}}`
+	client := newTestClient(t, "/v1/Bazi/zwpan", http.StatusOK, body)
+	resp, err := client.Bazi.Zwpan(context.Background(), BaziZwpanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err != nil {
+		t.Fatalf("zwpan failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || len(resp.Data.GongPan) == 0 || resp.Data.GongPan[0].Minggong != "疾厄宫" {
+		t.Fatalf("unexpected zwpan response: %#v", resp.Data)
+	}
+}
+
+func TestBaziZwpan_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/zwpan", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Zwpan(context.Background(), BaziZwpanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziZwpan_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/zwpan", http.StatusBadRequest, `bad request`)
+	_, err := client.Bazi.Zwpan(context.Background(), BaziZwpanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 400") {
+		t.Fatalf("expected http 400 error, got: %v", err)
+	}
+}
+
+func TestBaziYunshi_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三","sex":"坤造","yeargz":"庚辰"},"yunshi_info":{"lucky_number":"4、9","fortune_score":76,"jixiong_today":"中吉"}}}`
+	client := newTestClient(t, "/v1/Bazi/yunshi", http.StatusOK, body)
+	resp, err := client.Bazi.Yunshi(context.Background(), BaziYunshiRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "2000",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "11",
+	})
+	if err != nil {
+		t.Fatalf("yunshi failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.YunshiInfo.FortuneScore != 76 {
+		t.Fatalf("unexpected yunshi response: %#v", resp.Data)
+	}
+}
+
+func TestBaziYunshi_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/yunshi", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Yunshi(context.Background(), BaziYunshiRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "2000",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "11",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziYunshi_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/yunshi", http.StatusBadGateway, `bad gateway`)
+	_, err := client.Bazi.Yunshi(context.Background(), BaziYunshiRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "2000",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "11",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 502") {
+		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestBaziCaiyunfenxi_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三","liunian":"乙巳"},"bazi_info":{"kw":"子丑"},"caiyun_info":{"yearlyOverallFortuneScore":86,"yearlyMonthlyFortuneAndInvestmentTips":["1月建议"]}}}`
+	client := newTestClient(t, "/v1/Bazi/caiyunfenxi", http.StatusOK, body)
+	resp, err := client.Bazi.Caiyunfenxi(context.Background(), BaziCaiyunfenxiRequest{
+		Sex:     "1",
+		Type:    "1",
+		Year:    "1988",
+		LiuYear: "2025",
+		Month:   "1",
+		Day:     "8",
+		Hours:   "12",
+		Minute:  "20",
+	})
+	if err != nil {
+		t.Fatalf("caiyunfenxi failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.CaiyunInfo.YearlyOverallFortuneScore != 86 {
+		t.Fatalf("unexpected caiyunfenxi response: %#v", resp.Data)
+	}
+}
+
+func TestBaziCaiyunfenxi_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/caiyunfenxi", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Caiyunfenxi(context.Background(), BaziCaiyunfenxiRequest{
+		Sex:     "1",
+		Type:    "1",
+		Year:    "1988",
+		LiuYear: "2025",
+		Month:   "1",
+		Day:     "8",
+		Hours:   "12",
+		Minute:  "20",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziCaiyunfenxi_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/caiyunfenxi", http.StatusServiceUnavailable, `unavailable`)
+	_, err := client.Bazi.Caiyunfenxi(context.Background(), BaziCaiyunfenxiRequest{
+		Sex:     "1",
+		Type:    "1",
+		Year:    "1988",
+		LiuYear: "2025",
+		Month:   "1",
+		Day:     "8",
+		Hours:   "12",
+		Minute:  "20",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 503") {
+		t.Fatalf("expected http 503 error, got: %v", err)
+	}
+}
+
 func TestDivinationMeiri_Success(t *testing.T) {
 	body := `{"errcode":0,"errmsg":"ok","data":{"number":777,"guaming":"大安","description":{"卦曰":"a"}}}`
 	client := newTestClient(t, "/v1/Zhanbu/meiri", http.StatusOK, body)

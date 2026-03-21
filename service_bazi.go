@@ -33,6 +33,10 @@ var (
 	jingpanAllowedLang      = []string{"zh-cn", "zh-tw"}
 	jingsuanAllowedLang     = []string{"zh-cn", "en-us", "zh-tw"}
 	weilaiAllowedComputeDay = []string{"1", "2"}
+
+	zwpanAllowedLang       = []string{"zh-cn", "zh-tw"}
+	baziYunshiAllowedLang  = []string{"zh-cn", "en-us", "zh-tw"}
+	caiyunfenxiAllowedLang = []string{"zh-cn", "zh-tw", "en-us"}
 )
 
 type BaziService struct {
@@ -260,6 +264,64 @@ type BaziWeilaiRequest struct {
 	Latitude     string
 	Timezone     string
 	Lang         string // zh-cn / en-us / zh-tw
+}
+
+type BaziZwpanRequest struct {
+	Name      string
+	Sex       string // 0 男，1 女
+	Type      string // 0 农历，1 公历
+	Year      string
+	Month     string
+	Day       string
+	Hours     string
+	Minute    string
+	Zhen      string // 1 中国真太阳时，2 不使用真太阳时，3 全球真太阳时
+	Province  string
+	City      string
+	Longitude string
+	Latitude  string
+	Timezone  string
+	Sect      string // 1 晚子时日柱算明天，2 晚子时日柱算当天
+	Lang      string // zh-cn / zh-tw
+}
+
+type BaziYunshiRequest struct {
+	Name      string
+	Sex       string // 0 男，1 女
+	Type      string // 0 农历，1 公历
+	Year      string
+	Month     string
+	Day       string
+	Hours     string
+	Minute    string
+	Sect      string // 1 晚子时日柱算明天，2 晚子时日柱算当天
+	Zhen      string // 1 中国真太阳时，2 不使用真太阳时，3 全球真太阳时
+	Province  string
+	City      string
+	Longitude string
+	Latitude  string
+	Timezone  string
+	Lang      string // zh-cn / en-us / zh-tw
+}
+
+type BaziCaiyunfenxiRequest struct {
+	Name      string
+	Sex       string // 0 男，1 女
+	Type      string // 0 农历，1 公历
+	Year      string
+	LiuYear   string // 指定流年（公历年）
+	Month     string
+	Day       string
+	Hours     string
+	Minute    string
+	Sect      string // 1 晚子时日柱算明天，2 晚子时日柱算当天
+	Zhen      string // 1 中国真太阳时，2 不使用真太阳时，3 全球真太阳时
+	Province  string
+	City      string
+	Longitude string
+	Latitude  string
+	Timezone  string
+	Lang      string // zh-cn / zh-tw / en-us
 }
 
 func (r BaziHepanRequest) toValues() url.Values {
@@ -910,6 +972,389 @@ func (r BaziWeilaiRequest) Validate() error {
 	return nil
 }
 
+func (r BaziZwpanRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Name != "" {
+		v.Set("name", r.Name)
+	}
+	if r.Sex != "" {
+		v.Set("sex", r.Sex)
+	}
+	if r.Type != "" {
+		v.Set("type", r.Type)
+	}
+	if r.Year != "" {
+		v.Set("year", r.Year)
+	}
+	if r.Month != "" {
+		v.Set("month", r.Month)
+	}
+	if r.Day != "" {
+		v.Set("day", r.Day)
+	}
+	if r.Hours != "" {
+		v.Set("hours", r.Hours)
+	}
+	if r.Minute != "" {
+		v.Set("minute", r.Minute)
+	}
+	if r.Zhen != "" {
+		v.Set("zhen", r.Zhen)
+	}
+	if r.Province != "" {
+		v.Set("province", r.Province)
+	}
+	if r.City != "" {
+		v.Set("city", r.City)
+	}
+	if r.Longitude != "" {
+		v.Set("longitude", r.Longitude)
+	}
+	if r.Latitude != "" {
+		v.Set("latitude", r.Latitude)
+	}
+	if r.Timezone != "" {
+		v.Set("timezone", r.Timezone)
+	}
+	if r.Sect != "" {
+		v.Set("sect", r.Sect)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r BaziZwpanRequest) Validate() error {
+	if r.Sex == "" {
+		return newRequiredFieldError("sex")
+	}
+	if !inSet(r.Sex, baziAllowedSex) {
+		return newEnumFieldError("sex", r.Sex, baziAllowedSex)
+	}
+	if r.Type == "" {
+		return newRequiredFieldError("type")
+	}
+	if !inSet(r.Type, cesuanAllowedType) {
+		return newEnumFieldError("type", r.Type, cesuanAllowedType)
+	}
+
+	required := []struct {
+		field string
+		value string
+	}{
+		{"year", r.Year},
+		{"month", r.Month},
+		{"day", r.Day},
+		{"hours", r.Hours},
+		{"minute", r.Minute},
+	}
+	for _, x := range required {
+		if x.value == "" {
+			return newRequiredFieldError(x.field)
+		}
+	}
+
+	if r.Sect != "" && !inSet(r.Sect, cesuanAllowedSect) {
+		return newEnumFieldError("sect", r.Sect, cesuanAllowedSect)
+	}
+	if r.Zhen != "" && !inSet(r.Zhen, cesuanAllowedZhen) {
+		return newEnumFieldError("zhen", r.Zhen, cesuanAllowedZhen)
+	}
+	if r.Zhen == "1" {
+		if r.Province == "" {
+			return newRequiredFieldError("province")
+		}
+		if r.City == "" {
+			return newRequiredFieldError("city")
+		}
+	}
+	if r.Zhen == "3" {
+		if r.Longitude == "" {
+			return newRequiredFieldError("longitude")
+		}
+		lng, err := strconv.ParseFloat(r.Longitude, 64)
+		if err != nil {
+			return &ValidationError{Field: "longitude", Message: "must be a valid float"}
+		}
+		if lng < -180 || lng > 180 {
+			return &ValidationError{Field: "longitude", Message: "must be in range [-180, 180]"}
+		}
+		if r.Latitude == "" {
+			return newRequiredFieldError("latitude")
+		}
+		lat, err := strconv.ParseFloat(r.Latitude, 64)
+		if err != nil {
+			return &ValidationError{Field: "latitude", Message: "must be a valid float"}
+		}
+		if lat < -90 || lat > 90 {
+			return &ValidationError{Field: "latitude", Message: "must be in range [-90, 90]"}
+		}
+	}
+	if r.Lang != "" && !inSet(r.Lang, zwpanAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, zwpanAllowedLang)
+	}
+	return nil
+}
+
+func (r BaziYunshiRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Name != "" {
+		v.Set("name", r.Name)
+	}
+	if r.Sex != "" {
+		v.Set("sex", r.Sex)
+	}
+	if r.Type != "" {
+		v.Set("type", r.Type)
+	}
+	if r.Year != "" {
+		v.Set("year", r.Year)
+	}
+	if r.Month != "" {
+		v.Set("month", r.Month)
+	}
+	if r.Day != "" {
+		v.Set("day", r.Day)
+	}
+	if r.Hours != "" {
+		v.Set("hours", r.Hours)
+	}
+	if r.Minute != "" {
+		v.Set("minute", r.Minute)
+	}
+	if r.Sect != "" {
+		v.Set("sect", r.Sect)
+	}
+	if r.Zhen != "" {
+		v.Set("zhen", r.Zhen)
+	}
+	if r.Province != "" {
+		v.Set("province", r.Province)
+	}
+	if r.City != "" {
+		v.Set("city", r.City)
+	}
+	if r.Longitude != "" {
+		v.Set("longitude", r.Longitude)
+	}
+	if r.Latitude != "" {
+		v.Set("latitude", r.Latitude)
+	}
+	if r.Timezone != "" {
+		v.Set("timezone", r.Timezone)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r BaziYunshiRequest) Validate() error {
+	if r.Sex == "" {
+		return newRequiredFieldError("sex")
+	}
+	if !inSet(r.Sex, baziAllowedSex) {
+		return newEnumFieldError("sex", r.Sex, baziAllowedSex)
+	}
+	if r.Type == "" {
+		return newRequiredFieldError("type")
+	}
+	if !inSet(r.Type, cesuanAllowedType) {
+		return newEnumFieldError("type", r.Type, cesuanAllowedType)
+	}
+
+	required := []struct {
+		field string
+		value string
+	}{
+		{"year", r.Year},
+		{"month", r.Month},
+		{"day", r.Day},
+		{"hours", r.Hours},
+		{"minute", r.Minute},
+	}
+	for _, x := range required {
+		if x.value == "" {
+			return newRequiredFieldError(x.field)
+		}
+	}
+
+	if r.Sect != "" && !inSet(r.Sect, cesuanAllowedSect) {
+		return newEnumFieldError("sect", r.Sect, cesuanAllowedSect)
+	}
+	if r.Zhen != "" && !inSet(r.Zhen, cesuanAllowedZhen) {
+		return newEnumFieldError("zhen", r.Zhen, cesuanAllowedZhen)
+	}
+	if r.Zhen == "1" {
+		if r.Province == "" {
+			return newRequiredFieldError("province")
+		}
+		if r.City == "" {
+			return newRequiredFieldError("city")
+		}
+	}
+	if r.Zhen == "3" {
+		if r.Longitude == "" {
+			return newRequiredFieldError("longitude")
+		}
+		lng, err := strconv.ParseFloat(r.Longitude, 64)
+		if err != nil {
+			return &ValidationError{Field: "longitude", Message: "must be a valid float"}
+		}
+		if lng < -180 || lng > 180 {
+			return &ValidationError{Field: "longitude", Message: "must be in range [-180, 180]"}
+		}
+		if r.Latitude == "" {
+			return newRequiredFieldError("latitude")
+		}
+		lat, err := strconv.ParseFloat(r.Latitude, 64)
+		if err != nil {
+			return &ValidationError{Field: "latitude", Message: "must be a valid float"}
+		}
+		if lat < -90 || lat > 90 {
+			return &ValidationError{Field: "latitude", Message: "must be in range [-90, 90]"}
+		}
+	}
+	if r.Lang != "" && !inSet(r.Lang, baziYunshiAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, baziYunshiAllowedLang)
+	}
+	return nil
+}
+
+func (r BaziCaiyunfenxiRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Name != "" {
+		v.Set("name", r.Name)
+	}
+	if r.Sex != "" {
+		v.Set("sex", r.Sex)
+	}
+	if r.Type != "" {
+		v.Set("type", r.Type)
+	}
+	if r.Year != "" {
+		v.Set("year", r.Year)
+	}
+	if r.LiuYear != "" {
+		v.Set("liu_year", r.LiuYear)
+	}
+	if r.Month != "" {
+		v.Set("month", r.Month)
+	}
+	if r.Day != "" {
+		v.Set("day", r.Day)
+	}
+	if r.Hours != "" {
+		v.Set("hours", r.Hours)
+	}
+	if r.Minute != "" {
+		v.Set("minute", r.Minute)
+	}
+	if r.Sect != "" {
+		v.Set("sect", r.Sect)
+	}
+	if r.Zhen != "" {
+		v.Set("zhen", r.Zhen)
+	}
+	if r.Province != "" {
+		v.Set("province", r.Province)
+	}
+	if r.City != "" {
+		v.Set("city", r.City)
+	}
+	if r.Longitude != "" {
+		v.Set("longitude", r.Longitude)
+	}
+	if r.Latitude != "" {
+		v.Set("latitude", r.Latitude)
+	}
+	if r.Timezone != "" {
+		v.Set("timezone", r.Timezone)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r BaziCaiyunfenxiRequest) Validate() error {
+	if r.Sex == "" {
+		return newRequiredFieldError("sex")
+	}
+	if !inSet(r.Sex, baziAllowedSex) {
+		return newEnumFieldError("sex", r.Sex, baziAllowedSex)
+	}
+	if r.Type == "" {
+		return newRequiredFieldError("type")
+	}
+	if !inSet(r.Type, cesuanAllowedType) {
+		return newEnumFieldError("type", r.Type, cesuanAllowedType)
+	}
+
+	required := []struct {
+		field string
+		value string
+	}{
+		{"year", r.Year},
+		{"liu_year", r.LiuYear},
+		{"month", r.Month},
+		{"day", r.Day},
+		{"hours", r.Hours},
+		{"minute", r.Minute},
+	}
+	for _, x := range required {
+		if x.value == "" {
+			return newRequiredFieldError(x.field)
+		}
+	}
+
+	if _, err := strconv.Atoi(r.LiuYear); err != nil {
+		return &ValidationError{Field: "liu_year", Message: "must be a valid integer year"}
+	}
+
+	if r.Sect != "" && !inSet(r.Sect, cesuanAllowedSect) {
+		return newEnumFieldError("sect", r.Sect, cesuanAllowedSect)
+	}
+	if r.Zhen != "" && !inSet(r.Zhen, cesuanAllowedZhen) {
+		return newEnumFieldError("zhen", r.Zhen, cesuanAllowedZhen)
+	}
+	if r.Zhen == "1" {
+		if r.Province == "" {
+			return newRequiredFieldError("province")
+		}
+		if r.City == "" {
+			return newRequiredFieldError("city")
+		}
+	}
+	if r.Zhen == "3" {
+		if r.Longitude == "" {
+			return newRequiredFieldError("longitude")
+		}
+		lng, err := strconv.ParseFloat(r.Longitude, 64)
+		if err != nil {
+			return &ValidationError{Field: "longitude", Message: "must be a valid float"}
+		}
+		if lng < -180 || lng > 180 {
+			return &ValidationError{Field: "longitude", Message: "must be in range [-180, 180]"}
+		}
+		if r.Latitude == "" {
+			return newRequiredFieldError("latitude")
+		}
+		lat, err := strconv.ParseFloat(r.Latitude, 64)
+		if err != nil {
+			return &ValidationError{Field: "latitude", Message: "must be a valid float"}
+		}
+		if lat < -90 || lat > 90 {
+			return &ValidationError{Field: "latitude", Message: "must be in range [-90, 90]"}
+		}
+	}
+	if r.Lang != "" && !inSet(r.Lang, caiyunfenxiAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, caiyunfenxiAllowedLang)
+	}
+	return nil
+}
+
 func (r BaziHehunRequest) toValues() url.Values {
 	v := url.Values{}
 	if r.MaleName != "" {
@@ -1372,6 +1817,148 @@ type BaziJingsuanData struct {
 type BaziWeilaiData struct {
 	BaseInfo   BaziJingpanBaseInfo  `json:"base_info"`
 	DetailInfo BaziWeilaiDetailInfo `json:"detail_info"`
+}
+
+type BaziZwpanData struct {
+	BaseInfo BaziZwpanBaseInfo   `json:"base_info"`
+	GongPan  []BaziZwpanGongItem `json:"gong_pan"`
+}
+
+type BaziYunshiData struct {
+	BaseInfo   BaziYunshiBaseInfo `json:"base_info"`
+	YunshiInfo BaziYunshiInfo     `json:"yunshi_info"`
+}
+
+type BaziCaiyunfenxiData struct {
+	BaseInfo   BaziCaiyunfenxiBaseInfo `json:"base_info"`
+	BaziInfo   BaziInfo                `json:"bazi_info"`
+	CaiyunInfo BaziCaiyunfenxiInfo     `json:"caiyun_info"`
+}
+
+type BaziZwpanBaseInfo struct {
+	Zhen       *BaziZhenInfo `json:"zhen,omitempty"`
+	Sex        string        `json:"sex"`
+	Name       string        `json:"name"`
+	Age        int           `json:"age"`
+	Gongli     string        `json:"gongli"`
+	Nongli     string        `json:"nongli"`
+	Mingsihua  string        `json:"mingsihua"`
+	Minggong   string        `json:"minggong"`
+	Shengong   string        `json:"shengong"`
+	Zidou      string        `json:"zidou"`
+	Liudou     string        `json:"liudou"`
+	Mingju     string        `json:"mingju"`
+	Mingzhu    string        `json:"mingzhu"`
+	Shenzhu    string        `json:"shenzhu"`
+	YearGZ     string        `json:"yeargz"`
+	MonthGZ    string        `json:"monthgz"`
+	DayGZ      string        `json:"daygz"`
+	HourGZ     string        `json:"hourgz"`
+	YearNaYin  string        `json:"yearnayin"`
+	MonthNaYin string        `json:"monthnayin"`
+	DayNaYin   string        `json:"daynayin"`
+	HourNaYin  string        `json:"hournayin"`
+	GenderType string        `json:"gendertype"`
+}
+
+type BaziZwpanGongItem struct {
+	Minggong           string `json:"minggong"`
+	Yinshou            string `json:"yinshou"`
+	Jiangxing          string `json:"jiangxing"`
+	Changsheng         string `json:"changsheng"`
+	Daxian             string `json:"daxian"`
+	Xiaoxian           string `json:"xiaoxian"`
+	Boshi              string `json:"boshi"`
+	Ziweixing          string `json:"ziweixing"`
+	ZiweixingXingyao   string `json:"ziweixing_xingyao"`
+	ZiweixingSihua     string `json:"ziweixing_sihua"`
+	Tianfuxing         string `json:"tianfuxing"`
+	TianfuxingXingyao  string `json:"tianfuxing_xingyao"`
+	TianfuxingSihua    string `json:"tianfuxing_sihua"`
+	Monthxing          string `json:"monthxing"`
+	MonthxingXingyao   string `json:"monthxing_xingyao"`
+	MonthxingSihua     string `json:"monthxing_sihua"`
+	Hourxing           string `json:"hourxing"`
+	HourxingXingyao    string `json:"hourxing_xingyao"`
+	HourxingSihua      string `json:"hourxing_sihua"`
+	Yearganxing        string `json:"yearganxing"`
+	YearganxingXingyao string `json:"yearganxing_xingyao"`
+	YearganxingSihua   string `json:"yearganxing_sihua"`
+	Yearzhixing        string `json:"yearzhixing"`
+	YearzhixingXingyao string `json:"yearzhixing_xingyao"`
+	YearzhixingSihua   string `json:"yearzhixing_sihua"`
+	Qitaxing           string `json:"qitaxing"`
+	QitaxingXingyao    string `json:"qitaxing_xingyao"`
+	QitaxingSihua      string `json:"qitaxing_sihua"`
+	ZiweixingDesc      string `json:"ziweixing_desc"`
+	TianfuxingDesc     string `json:"tianfuxing_desc"`
+	FuxingDesc         string `json:"fuxing_desc"`
+}
+
+type BaziYunshiBaseInfo struct {
+	Zhen       *BaziZhenInfo        `json:"zhen,omitempty"`
+	Sex        string               `json:"sex"`
+	Name       string               `json:"name"`
+	Gongli     string               `json:"gongli"`
+	Nongli     string               `json:"nongli"`
+	YearGZ     string               `json:"yeargz"`
+	MonthGZ    string               `json:"monthgz"`
+	DayGZ      string               `json:"daygz"`
+	HourGZ     string               `json:"hourgz"`
+	Zhengge    string               `json:"zhengge"`
+	Shengxiao  string               `json:"shengxiao"`
+	Xiyongshen BaziCesuanXiyongshen `json:"xiyongshen"`
+	WuxingXiji string               `json:"wuxing_xiji"`
+}
+
+type BaziYunshiInfo struct {
+	LuckyNumber        string `json:"lucky_number"`
+	LuckyColor         string `json:"lucky_color"`
+	LuckyAccessory     string `json:"lucky_accessory"`
+	LuckyFoods         string `json:"lucky_foods"`
+	LuckyDirections    string `json:"lucky_directions"`
+	LuckyYi            string `json:"lucky_yi"`
+	LuckyJi            string `json:"lucky_ji"`
+	HealthScore        int    `json:"health_score"`
+	CareerScore        int    `json:"career_score"`
+	LoveScore          int    `json:"love_score"`
+	WealthScore        int    `json:"wealth_score"`
+	FortuneScore       int    `json:"fortune_score"`
+	JixiongToday       string `json:"jixiong_today"`
+	HealthDescription  string `json:"health_description"`
+	CareerDescription  string `json:"career_description"`
+	LoveDescription    string `json:"love_description"`
+	WealthDescription  string `json:"wealth_description"`
+	FortuneDescription string `json:"fortune_description"`
+}
+
+type BaziCaiyunfenxiBaseInfo struct {
+	Zhen     *BaziZhenInfo `json:"zhen,omitempty"`
+	Sex      string        `json:"sex"`
+	Name     string        `json:"name"`
+	Gongli   string        `json:"gongli"`
+	Nongli   string        `json:"nongli"`
+	Qiyun    string        `json:"qiyun"`
+	Jiaoyun  string        `json:"jiaoyun"`
+	Dayun    string        `json:"dayun"`
+	Liunian  string        `json:"liunian"`
+	Qiangruo string        `json:"qiangruo"`
+	Zhengge  string        `json:"zhengge"`
+}
+
+type BaziCaiyunfenxiInfo struct {
+	YearlyOverallFortuneScore             int      `json:"yearlyOverallFortuneScore"`
+	YearlyFortuneStarVisibility           string   `json:"yearlyFortuneStarVisibility"`
+	YearlyFortuneStarCategory             string   `json:"yearlyFortuneStarCategory"`
+	BodyStrengthVsWeakness                string   `json:"bodyStrengthVsWeakness"`
+	YearlyVsDestinyBranch                 string   `json:"yearlyVsDestinyBranch"`
+	YearlyFortuneTreasuryInfo             string   `json:"yearlyFortuneTreasuryInfo"`
+	MajorFortunePeriodVsYearly            string   `json:"majorFortunePeriodVsYearly"`
+	YearlyMonthlyFortuneAndInvestmentTips []string `json:"yearlyMonthlyFortuneAndInvestmentTips"`
+	InnateFortunePattern                  string   `json:"innateFortunePattern"`
+	FortuneLeakageRiskTips                string   `json:"fortuneLeakageRiskTips"`
+	FortuneImprovementSuggestions         string   `json:"fortuneImprovementSuggestions"`
+	MasterFortuneSuggestions              string   `json:"masterFortuneSuggestions"`
 }
 
 type BaziJingpanBaseInfo struct {
@@ -1881,6 +2468,51 @@ func (s *BaziService) Weilai(ctx context.Context, req BaziWeilaiRequest) (*Commo
 
 	resp := &CommonResponse[BaziWeilaiData]{}
 	if err := s.client.doForm(ctx, "/v1/Bazi/weilai", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *BaziService) Zwpan(ctx context.Context, req BaziZwpanRequest) (*CommonResponse[BaziZwpanData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[BaziZwpanData]{}
+	if err := s.client.doForm(ctx, "/v1/Bazi/zwpan", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *BaziService) Yunshi(ctx context.Context, req BaziYunshiRequest) (*CommonResponse[BaziYunshiData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[BaziYunshiData]{}
+	if err := s.client.doForm(ctx, "/v1/Bazi/yunshi", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *BaziService) Caiyunfenxi(ctx context.Context, req BaziCaiyunfenxiRequest) (*CommonResponse[BaziCaiyunfenxiData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[BaziCaiyunfenxiData]{}
+	if err := s.client.doForm(ctx, "/v1/Bazi/caiyunfenxi", req.toValues(), resp); err != nil {
 		return nil, err
 	}
 	if resp.ErrCode != 0 {

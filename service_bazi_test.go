@@ -611,3 +611,148 @@ func TestBaziWeilaiDataUnmarshal(t *testing.T) {
 		t.Fatalf("unexpected weilai data: %#v", resp.Data)
 	}
 }
+
+func TestBaziZwpanRequestValidate(t *testing.T) {
+	okReq := BaziZwpanRequest{
+		Sex:       "1",
+		Type:      "1",
+		Year:      "1988",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+		Lang:      "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziZwpanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+		Lang:   "en-us",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziZwpanDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"sex":"坤造","name":"张三","age":36,"gongli":"1988年11月08日12时20分","nongli":"1988年九月廿九日午时","mingsihua":"机阴贪弼","minggong":"辰","gendertype":"阴女"},"gong_pan":[{"minggong":"疾厄宫","ziweixing":"","tianfuxing":"太阴","yearzhixing":"红鸾,大耗","fuxing_desc":"辅星详解"}]}}`
+	var resp CommonResponse[BaziZwpanData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal zwpan data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.BaseInfo.Age != 36 || resp.Data.GongPan[0].Minggong != "疾厄宫" {
+		t.Fatalf("unexpected zwpan data: %#v", resp.Data)
+	}
+}
+
+func TestBaziYunshiRequestValidate(t *testing.T) {
+	okReq := BaziYunshiRequest{
+		Sex:       "1",
+		Type:      "1",
+		Year:      "2000",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "11",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+		Lang:      "en-us",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziYunshiRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "2000",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "11",
+		Lang:   "fr-fr",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziYunshiDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"sex":"坤造","name":"张三","gongli":"2000-11-08 12:05:00","nongli":"二〇〇〇年十月十三日 午时","yeargz":"庚辰","monthgz":"丁亥","daygz":"庚午","hourgz":"壬午","zhengge":"食神格","shengxiao":"龙","wuxing_xiji":"喜金","xiyongshen":{"shui_score":118}},"yunshi_info":{"lucky_number":"4、9","lucky_color":"白色","health_score":75,"career_score":80,"love_score":80,"wealth_score":70,"fortune_score":76,"jixiong_today":"中吉","health_description":"健康说明","fortune_description":"总体说明"}}}`
+	var resp CommonResponse[BaziYunshiData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal yunshi data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.YunshiInfo.FortuneScore != 76 || resp.Data.YunshiInfo.JixiongToday != "中吉" {
+		t.Fatalf("unexpected yunshi data: %#v", resp.Data)
+	}
+}
+
+func TestBaziCaiyunfenxiRequestValidate(t *testing.T) {
+	okReq := BaziCaiyunfenxiRequest{
+		Sex:       "1",
+		Type:      "1",
+		Year:      "1988",
+		LiuYear:   "2025",
+		Month:     "1",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+		Lang:      "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziCaiyunfenxiRequest{
+		Sex:     "1",
+		Type:    "1",
+		Year:    "1988",
+		LiuYear: "abc",
+		Month:   "1",
+		Day:     "8",
+		Hours:   "12",
+		Minute:  "20",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziCaiyunfenxiDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"sex":"坤造","name":"张三","gongli":"1988年1月8日12时1分","nongli":"丁卯年 十一月 十九日 午时","qiyun":"9年1月23天起运","jiaoyun":"1997年1月14日1时12分38秒","dayun":"丙辰","liunian":"乙巳","qiangruo":"八字偏弱","zhengge":"正官格"},"bazi_info":{"kw":"子丑","tg_cg_god":["正财"],"bazi":["丁卯","癸丑","壬戌","丙午"],"dz_cg":["乙"],"dz_cg_god":["伤官"],"day_cs":["死"],"na_yin":["炉中火"]},"caiyun_info":{"yearlyOverallFortuneScore":86,"yearlyFortuneStarVisibility":"隐于地支","yearlyFortuneStarCategory":"正财气足","bodyStrengthVsWeakness":"身弱","yearlyVsDestinyBranch":"合多于冲","yearlyFortuneTreasuryInfo":"流动生财","majorFortunePeriodVsYearly":"运岁相生","yearlyMonthlyFortuneAndInvestmentTips":["1月建议","2月建议"],"innateFortunePattern":"财运格局","fortuneLeakageRiskTips":"社交开支","fortuneImprovementSuggestions":"南方火位","masterFortuneSuggestions":"贵人助财"}}}`
+	var resp CommonResponse[BaziCaiyunfenxiData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal caiyunfenxi data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Liunian != "乙巳" || resp.Data.CaiyunInfo.YearlyOverallFortuneScore != 86 || len(resp.Data.CaiyunInfo.YearlyMonthlyFortuneAndInvestmentTips) != 2 {
+		t.Fatalf("unexpected caiyunfenxi data: %#v", resp.Data)
+	}
+}

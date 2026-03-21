@@ -8,15 +8,15 @@
 ## 1. 当前进度总览（已录入域）
 
 - 已录入总数：25
-- 已实现：14
+- 已实现：17
 - 进行中：0
-- 待实现：11
+- 待实现：8
 
 ```mermaid
 pie title free/bazi/zhanbu 三域接口覆盖
-    "done" : 14
+    "done" : 17
     "in_progress" : 0
-    "todo" : 11
+    "todo" : 8
 ```
 
 ---
@@ -35,12 +35,12 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | bazi | 八字精盘 | Jingpan | POST | /v1/Bazi/jingpan | P1 | done | typed struct | unit |
 | bazi | 八字精算 | Jingsuan | POST | /v1/Bazi/jingsuan | P1 | done | typed struct | unit |
 | bazi | 未来运势 | Weilai | POST | /v1/Bazi/weilai | P1 | done | typed struct | unit |
-| bazi | 紫微排盘 | Zwpan | POST | /v1/Bazi/zwpan | P1 | todo | typed struct | none |
+| bazi | 紫微排盘 | Zwpan | POST | /v1/Bazi/zwpan | P1 | done | typed struct | unit |
 | bazi | 称骨论命 | Chenggu | POST | /v1/Bazi/chenggu | P2 | todo | typed struct | none |
 | bazi | 骨相论命 | Guxiang | POST | /v1/Bazi/guxiang | P2 | todo | typed struct | none |
 | bazi | 生日论命 | Shengri | POST | /v1/Bazi/shengri | P2 | todo | typed struct | none |
-| bazi | 八字每日运势 | Yunshi | POST | /v1/Bazi/yunshi | P1 | todo | typed struct | none |
-| bazi | 流年财运分析 | Caiyunfenxi | POST | /v1/Bazi/caiyunfenxi | P1 | todo | typed struct | none |
+| bazi | 八字每日运势 | Yunshi | POST | /v1/Bazi/yunshi | P1 | done | typed struct | unit |
+| bazi | 流年财运分析 | Caiyunfenxi | POST | /v1/Bazi/caiyunfenxi | P1 | done | typed struct | unit |
 | zhanbu | 塔罗牌解读(新版) | Taluojiedu | POST | /v1/Zhanbu/taluojiedu | P1 | todo | typed struct | none |
 | zhanbu | 塔罗洗牌(旧版) | Taluoxipai | POST | /v1/Zhanbu/taluoxipai | P2 | todo | typed struct | none |
 | zhanbu | 一张牌占卜(旧版) | Taluozhanbu | POST | /v1/Zhanbu/taluozhanbu | P2 | todo | typed struct | none |
@@ -94,6 +94,6 @@ pie title free/bazi/zhanbu 三域接口覆盖
 
 ## 5. 下一步（执行顺序）
 
-1. Batch-1 继续实现：`bazi/zwpan`（P1）。
-2. Batch-1 继续实现：`bazi/yunshi`（P1）。
-3. Batch-1 继续实现：`bazi/caiyunfenxi`（P1）。
+1. Batch-1 继续实现：`zhanbu/taluojiedu`（P1）。
+2. Batch-1 继续实现：`zhanbu/yunshi`（P1）。
+3. Batch-1 继续实现：`zhanbu/shengxiaoyunshi`（P1）。
