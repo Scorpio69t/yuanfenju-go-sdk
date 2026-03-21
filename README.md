@@ -12,7 +12,7 @@
 - 支持 `context.Context`、自定义 `http.Client`、可配置 Base URL
 - 前期内置关键接口：
   - 免费：账户查询、调用查询
-  - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算
+  - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算、八字精盘、八字精算、未来运势
   - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜
 
 ## 安装
@@ -69,6 +69,9 @@ flowchart LR
     C --> C3[Hehun]
     C --> C4[Hepan]
     C --> C5[Cesuan]
+    C --> C6[Jingpan]
+    C --> C7[Jingsuan]
+    C --> C8[Weilai]
 
     D --> D1[Meiri]
     D --> D2[Xiaoliuren]
@@ -102,6 +105,9 @@ sequenceDiagram
 | Bazi | `client.Bazi.Hehun` | `/v1/Bazi/hehun` |
 | Bazi | `client.Bazi.Hepan` | `/v1/Bazi/hepan` |
 | Bazi | `client.Bazi.Cesuan` | `/v1/Bazi/cesuan` |
+| Bazi | `client.Bazi.Jingpan` | `/v1/Bazi/jingpan` |
+| Bazi | `client.Bazi.Jingsuan` | `/v1/Bazi/jingsuan` |
+| Bazi | `client.Bazi.Weilai` | `/v1/Bazi/weilai` |
 | Divination | `client.Divination.Meiri` | `/v1/Zhanbu/meiri` |
 | Divination | `client.Divination.Xiaoliuren` | `/v1/Zhanbu/xiaoliuren` |
 | Divination | `client.Divination.Zhiwen` | `/v1/Zhanbu/zhiwen` |

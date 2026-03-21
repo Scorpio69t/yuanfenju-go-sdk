@@ -3,7 +3,9 @@ package yuanfenju
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func TestBaziPaipanDataUnmarshal(t *testing.T) {
@@ -396,5 +398,216 @@ func TestBaziCesuanDataUnmarshal(t *testing.T) {
 	}
 	if resp.Data.BaseInfo.Name != "张三" || resp.Data.Caiyun.SanshishuCaiyun.SimpleDesc != "先苦后甜" || resp.Data.Xiyongshen.ShuiScore != 118 {
 		t.Fatalf("unexpected cesuan data: %#v", resp.Data)
+	}
+}
+
+func TestBaziJingpanRequestValidate(t *testing.T) {
+	okReq := BaziJingpanRequest{
+		Sex:        "0",
+		Type:       "1",
+		Year:       "1994",
+		Month:      "4",
+		Day:        "30",
+		Hours:      "10",
+		Minute:     "0",
+		LoadMode:   "2",
+		DayunIndex: "2",
+		Zhen:       "3",
+		Longitude:  "116.46",
+		Latitude:   "39.92",
+		Lang:       "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziJingpanRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1994",
+		Month:  "4",
+		Day:    "30",
+		Hours:  "10",
+		Minute: "0",
+		IsZip:  "3",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziJingpanDataUnmarshal(t *testing.T) {
+	raw := `{
+		"errcode":0,
+		"errmsg":"ok",
+		"data":{
+			"base_info":{
+				"sex":"乾造",
+				"name":"张三",
+				"gongli":"1994-04-30 10:00:00",
+				"nongli":"一九九四年三月二十日 巳时",
+				"zhengge":"伤官格",
+				"minggua":{"minggua_name":"乾","minggua_fangwei":"西四命"},
+				"xiyongshen":{"shui_score":118}
+			},
+			"detail_info":{
+				"dayun_info":[{"dayun_index":1,"dayun_start_year":1996,"dayun_shensha":"禄神","liunian_info":[{"liunian_index":0,"liunian_year":1996}]}],
+				"sizhu_info":{"year":{"tg_god":"偏印","tg":"甲","dz":"戌"},"month":{"tg_god":"食神"},"day":{"tg_god":"日主"},"hour":{"tg_god":"正官"}},
+				"taishen_info":{"taiyuan":{"ganzhi":"己未"}}
+			}
+		}
+	}`
+	var resp CommonResponse[BaziJingpanData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal jingpan data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.DetailInfo.DayunInfo[0].DayunIndex != 1 || resp.Data.DetailInfo.SizhuInfo.Year.TG != "甲" {
+		t.Fatalf("unexpected jingpan data: %#v", resp.Data)
+	}
+}
+
+func TestBaziJingsuanRequestValidate(t *testing.T) {
+	okReq := BaziJingsuanRequest{
+		Sex:       "1",
+		Type:      "1",
+		Year:      "1988",
+		Month:     "11",
+		Day:       "8",
+		Hours:     "12",
+		Minute:    "20",
+		Zhen:      "3",
+		Longitude: "116.46",
+		Latitude:  "39.92",
+		Lang:      "zh-cn",
+		Factor:    "1",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziJingsuanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+		Lang:   "fr-fr",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziJingsuanDataUnmarshal(t *testing.T) {
+	raw := `{
+		"errcode":0,
+		"errmsg":"ok",
+		"data":{
+			"base_info":{"name":"张三","sex":"乾造","gongli":"a","nongli":"b"},
+			"detail_info":{
+				"dayun_info":[{"dayun_index":1,"dayun_shensha":"禄神","dayun_indication":{"shiye":"事业"}}],
+				"sizhu_info":{
+					"year":{"tg_god":"伤官","tg":"戊","dz":"辰"},
+					"month":{"tg_god":"七杀"},
+					"day":{"tg_god":"日主"},
+					"hour":{"tg_god":"偏印"},
+					"sizhu_indication":{
+						"chenggu":{"total_weight":"3.8"},
+						"wuxing":{"simple_desc":"木"},
+						"yinyuan":{"sanshishu_yinyuan":"夫妻和合"},
+						"caiyun":{"sanshishu_caiyun":{"simple_desc":"知足常乐"}},
+						"xingge":{"rizhu":"癸亥日柱"},
+						"mingyun":{"sanshishu_mingyun":"命运批示"}
+					}
+				}
+			}
+		}
+	}`
+	var resp CommonResponse[BaziJingsuanData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal jingsuan data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.DetailInfo.SizhuInfo.SizhuIndication.Caiyun.SanshishuCaiyun.SimpleDesc != "知足常乐" || resp.Data.DetailInfo.DayunInfo[0].DayunIndication.Shiye != "事业" {
+		t.Fatalf("unexpected jingsuan data: %#v", resp.Data)
+	}
+}
+
+func TestBaziWeilaiRequestValidate(t *testing.T) {
+	currentYear := time.Now().Year()
+	okReq := BaziWeilaiRequest{
+		Sex:        "1",
+		Type:       "1",
+		Year:       "1988",
+		Month:      "11",
+		Day:        "8",
+		Hours:      "12",
+		Minute:     "20",
+		YunshiYear: strconv.Itoa(currentYear),
+		Zhen:       "3",
+		Longitude:  "116.46",
+		Latitude:   "39.92",
+		Lang:       "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziWeilaiRequest{
+		Sex:        "1",
+		Type:       "1",
+		Year:       "1988",
+		Month:      "11",
+		Day:        "8",
+		Hours:      "12",
+		Minute:     "20",
+		YunshiYear: strconv.Itoa(currentYear - 1),
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziWeilaiDataUnmarshal(t *testing.T) {
+	raw := `{
+		"errcode":0,
+		"errmsg":"ok",
+		"data":{
+			"base_info":{"name":"张三","sex":"乾造","gongli":"a","nongli":"b"},
+			"detail_info":{
+				"sizhu_info":{
+					"year":{"tg_god":"伤官","tg":"戊","dz":"辰"},
+					"month":{"tg_god":"七杀"},
+					"day":{"tg_god":"日主"},
+					"hour":{"tg_god":"偏印"}
+				},
+				"yunshi_year_info":{
+					"yunshi_year":{"year":2026,"tg_god":"伤官","tg":"甲","dz":"辰","indication":{"shiye":"事业预测"}}
+				},
+				"yunshi_month_info":[
+					{"month":"1月","tg_god":"正官","tg":"乙","dz":"丑","indication":{"caiyun":"月财运"},"yunshi_day_info":[{"day":"1号","tg_god":"日主","tg":"丙","dz":"申","indication":{"yunshi":"日运势"}}]}
+				]
+			}
+		}
+	}`
+	var resp CommonResponse[BaziWeilaiData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal weilai data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.DetailInfo.YunshiYearInfo.YunshiYear.Year != 2026 || resp.Data.DetailInfo.YunshiMonthInfo[0].YunshiDayInfo[0].Day != "1号" {
+		t.Fatalf("unexpected weilai data: %#v", resp.Data)
 	}
 }

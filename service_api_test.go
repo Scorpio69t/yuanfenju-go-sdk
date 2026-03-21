@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -461,6 +462,189 @@ func TestBaziCesuan_HTTPError(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "http 502") {
 		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestBaziJingpan_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三","sex":"乾造"},"detail_info":{"dayun_info":[{"dayun_index":1}],"sizhu_info":{"year":{"tg":"甲"}}}}}`
+	client := newTestClient(t, "/v1/Bazi/jingpan", http.StatusOK, body)
+
+	resp, err := client.Bazi.Jingpan(context.Background(), BaziJingpanRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1994",
+		Month:  "4",
+		Day:    "30",
+		Hours:  "10",
+		Minute: "0",
+	})
+	if err != nil {
+		t.Fatalf("jingpan failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.DetailInfo.DayunInfo[0].DayunIndex != 1 {
+		t.Fatalf("unexpected jingpan response: %#v", resp.Data)
+	}
+}
+
+func TestBaziJingpan_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/jingpan", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Jingpan(context.Background(), BaziJingpanRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1994",
+		Month:  "4",
+		Day:    "30",
+		Hours:  "10",
+		Minute: "0",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziJingpan_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/jingpan", http.StatusBadRequest, `bad request`)
+	_, err := client.Bazi.Jingpan(context.Background(), BaziJingpanRequest{
+		Sex:    "0",
+		Type:   "1",
+		Year:   "1994",
+		Month:  "4",
+		Day:    "30",
+		Hours:  "10",
+		Minute: "0",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 400") {
+		t.Fatalf("expected http 400 error, got: %v", err)
+	}
+}
+
+func TestBaziJingsuan_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三","sex":"乾造"},"detail_info":{"dayun_info":[{"dayun_index":1,"dayun_indication":{"shiye":"事业"}}],"sizhu_info":{"year":{"tg":"戊"},"sizhu_indication":{"caiyun":{"sanshishu_caiyun":{"simple_desc":"知足常乐"}}}}}}}`
+	client := newTestClient(t, "/v1/Bazi/jingsuan", http.StatusOK, body)
+
+	resp, err := client.Bazi.Jingsuan(context.Background(), BaziJingsuanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err != nil {
+		t.Fatalf("jingsuan failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.DetailInfo.SizhuInfo.SizhuIndication.Caiyun.SanshishuCaiyun.SimpleDesc != "知足常乐" {
+		t.Fatalf("unexpected jingsuan response: %#v", resp.Data)
+	}
+}
+
+func TestBaziJingsuan_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/jingsuan", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Jingsuan(context.Background(), BaziJingsuanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziJingsuan_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/jingsuan", http.StatusBadGateway, `bad gateway`)
+	_, err := client.Bazi.Jingsuan(context.Background(), BaziJingsuanRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 502") {
+		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestBaziWeilai_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"name":"张三","sex":"乾造"},"detail_info":{"sizhu_info":{"year":{"tg":"戊"}},"yunshi_year_info":{"yunshi_year":{"year":2026,"indication":{"shiye":"事业"}}},"yunshi_month_info":[{"month":"1月","yunshi_day_info":[{"day":"1号"}]}]}}}`
+	client := newTestClient(t, "/v1/Bazi/weilai", http.StatusOK, body)
+
+	resp, err := client.Bazi.Weilai(context.Background(), BaziWeilaiRequest{
+		Sex:        "1",
+		Type:       "1",
+		Year:       "1988",
+		Month:      "11",
+		Day:        "8",
+		Hours:      "12",
+		Minute:     "20",
+		YunshiYear: strconv.Itoa(time.Now().Year()),
+	})
+	if err != nil {
+		t.Fatalf("weilai failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || len(resp.Data.DetailInfo.YunshiMonthInfo) == 0 || resp.Data.DetailInfo.YunshiMonthInfo[0].YunshiDayInfo[0].Day != "1号" {
+		t.Fatalf("unexpected weilai response: %#v", resp.Data)
+	}
+}
+
+func TestBaziWeilai_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/weilai", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Bazi.Weilai(context.Background(), BaziWeilaiRequest{
+		Sex:        "1",
+		Type:       "1",
+		Year:       "1988",
+		Month:      "11",
+		Day:        "8",
+		Hours:      "12",
+		Minute:     "20",
+		YunshiYear: strconv.Itoa(time.Now().Year()),
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestBaziWeilai_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Bazi/weilai", http.StatusServiceUnavailable, `unavailable`)
+	_, err := client.Bazi.Weilai(context.Background(), BaziWeilaiRequest{
+		Sex:        "1",
+		Type:       "1",
+		Year:       "1988",
+		Month:      "11",
+		Day:        "8",
+		Hours:      "12",
+		Minute:     "20",
+		YunshiYear: strconv.Itoa(time.Now().Year()),
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 503") {
+		t.Fatalf("expected http 503 error, got: %v", err)
 	}
 }
 
