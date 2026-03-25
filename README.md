@@ -13,7 +13,7 @@
 - 前期内置关键接口：
   - 免费：账户查询、调用查询
   - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算、八字精盘、八字精算、未来运势、紫微排盘、八字每日运势、流年财运分析
-  - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜
+  - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜、塔罗牌解读（新版）、星座每日运势、生肖每日运势
 
 ## 安装
 
@@ -80,6 +80,9 @@ flowchart LR
     D --> D2[Xiaoliuren]
     D --> D3[Zhiwen]
     D --> D4[Yaogua]
+    D --> D5[Taluojiedu]
+    D --> D6[Yunshi]
+    D --> D7[Shengxiaoyunshi]
 ```
 
 ## 请求生命周期
@@ -118,6 +121,9 @@ sequenceDiagram
 | Divination | `client.Divination.Xiaoliuren` | `/v1/Zhanbu/xiaoliuren` |
 | Divination | `client.Divination.Zhiwen` | `/v1/Zhanbu/zhiwen` |
 | Divination | `client.Divination.Yaogua` | `/v1/Zhanbu/yaogua` |
+| Divination | `client.Divination.Taluojiedu` | `/v1/Zhanbu/taluojiedu` |
+| Divination | `client.Divination.Yunshi` | `/v1/Zhanbu/yunshi` |
+| Divination | `client.Divination.Shengxiaoyunshi` | `/v1/Zhanbu/yunshi` |
 
 ## 扩展路线
 

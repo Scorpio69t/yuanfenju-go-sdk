@@ -995,3 +995,135 @@ func TestDivinationYaogua_HTTPError(t *testing.T) {
 		t.Fatalf("expected http 503 error, got: %v", err)
 	}
 }
+
+func TestDivinationTaluojiedu_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"cards":[{"positions_index":1,"positions_name":"选项A","card_name":"隐者","card_interpretation":{"general":"g"}}],"overall_interpretation":{"summary_message":"summary","oracle_message":"oracle"},"environment":{"calculation_time":"2025-12-18 14:58:09","time_ganzhi":"乙未","time_element":"土局"}}}`
+	client := newTestClient(t, "/v1/Zhanbu/taluojiedu", http.StatusOK, body)
+	resp, err := client.Divination.Taluojiedu(context.Background(), TaluojieduRequest{
+		SpreadID: "2",
+		TopicID:  "1",
+		Lang:     "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("taluojiedu failed: %v", err)
+	}
+	if len(resp.Data.Cards) != 1 || resp.Data.Cards[0].CardName != "隐者" || resp.Data.OverallInterpretation.OracleMessage != "oracle" {
+		t.Fatalf("unexpected taluojiedu response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationTaluojiedu_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluojiedu", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Divination.Taluojiedu(context.Background(), TaluojieduRequest{
+		SpreadID: "2",
+		TopicID:  "1",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationTaluojiedu_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluojiedu", http.StatusBadGateway, `bad gateway`)
+	_, err := client.Divination.Taluojiedu(context.Background(), TaluojieduRequest{
+		SpreadID: "2",
+		TopicID:  "1",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 502") {
+		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestDivinationYunshi_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"运势类型":"白羊座","今日运势":{"速配星座":"处女座","综合分数":"78","今明运势":"today"},"明日运势":{"速配星座":"双鱼座","今明运势":"tomorrow"},"本周运势":{"速配星座":"巨蟹座","本周运势":"week"},"本月运势":{"速配星座":"摩羯座","本月运势":"month"},"本年运势":{"速配星座":"巨蟹座","本年运势":"year"}}}`
+	client := newTestClient(t, "/v1/Zhanbu/yunshi", http.StatusOK, body)
+	resp, err := client.Divination.Yunshi(context.Background(), DivinationYunshiRequest{
+		Type:        "0",
+		TitleYunshi: "3",
+		Lang:        "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("divination yunshi failed: %v", err)
+	}
+	if resp.Data.FortuneType != "白羊座" || resp.Data.DailyFortune.CompatibleSign != "处女座" || resp.Data.WeeklyFortune.WeeklyFortune != "week" {
+		t.Fatalf("unexpected divination yunshi response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationYunshi_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/yunshi", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Divination.Yunshi(context.Background(), DivinationYunshiRequest{
+		Type:        "0",
+		TitleYunshi: "3",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationYunshi_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/yunshi", http.StatusServiceUnavailable, `unavailable`)
+	_, err := client.Divination.Yunshi(context.Background(), DivinationYunshiRequest{
+		Type:        "0",
+		TitleYunshi: "3",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 503") {
+		t.Fatalf("expected http 503 error, got: %v", err)
+	}
+}
+
+func TestDivinationShengxiaoyunshi_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"运势类型":"属鼠","今日运势":{"速配生肖":"猪","综合分数":"78","今明运势":"today"},"明日运势":{"速配生肖":"龙","今明运势":"tomorrow"},"本周运势":{"速配生肖":"猪","本周运势":"week"},"本月运势":{"速配生肖":"狗","本月运势":"month"},"本年运势":{"速配生肖":"狗","本年运势":"year"}}}`
+	client := newTestClient(t, "/v1/Zhanbu/yunshi", http.StatusOK, body)
+	resp, err := client.Divination.Shengxiaoyunshi(context.Background(), ShengxiaoyunshiRequest{
+		TitleYunshi: "3",
+		Lang:        "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("shengxiaoyunshi failed: %v", err)
+	}
+	if resp.Data.FortuneType != "属鼠" || resp.Data.DailyFortune.CompatibleZodiac != "猪" || resp.Data.MonthlyFortune.MonthlyFortune != "month" {
+		t.Fatalf("unexpected shengxiaoyunshi response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationShengxiaoyunshi_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/yunshi", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Divination.Shengxiaoyunshi(context.Background(), ShengxiaoyunshiRequest{
+		TitleYunshi: "3",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationShengxiaoyunshi_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/yunshi", http.StatusBadRequest, `bad request`)
+	_, err := client.Divination.Shengxiaoyunshi(context.Background(), ShengxiaoyunshiRequest{
+		TitleYunshi: "3",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 400") {
+		t.Fatalf("expected http 400 error, got: %v", err)
+	}
+}

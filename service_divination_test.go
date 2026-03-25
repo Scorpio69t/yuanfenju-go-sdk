@@ -141,3 +141,73 @@ func TestYaoguaDataUnmarshal(t *testing.T) {
 		t.Fatalf("unexpected yaogua data: %#v", resp.Data)
 	}
 }
+
+func TestTaluojieduRequestValidate(t *testing.T) {
+	okReq := TaluojieduRequest{SpreadID: "2", TopicID: "1", Lang: "zh-cn"}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := TaluojieduRequest{SpreadID: "18", TopicID: "1"}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestTaluojieduDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"cards":[{"positions_index":1,"positions_name":"选项A","positions_desc":"desc","orientation_code":1,"orientation_text":"正位","card_no":10,"card_name":"隐者","card_keywords":"内省","card_astrology":"处女座","card_element":"土","card_description":"牌面","card_interpretation":{"general":"g","topic":"t","advice":"a"},"image_id":10,"image_url":"https://img"}],"overall_interpretation":{"summary_message":"summary","oracle_message":"oracle"},"environment":{"calculation_time":"2025-12-18 14:58:09","time_ganzhi":"乙未","time_element":"土局"}}}`
+	var resp CommonResponse[TaluojieduData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal taluojiedu data failed: %v", err)
+	}
+	if len(resp.Data.Cards) != 1 || resp.Data.Cards[0].CardName != "隐者" || resp.Data.OverallInterpretation.OracleMessage != "oracle" {
+		t.Fatalf("unexpected taluojiedu data: %#v", resp.Data)
+	}
+}
+
+func TestDivinationYunshiRequestValidate(t *testing.T) {
+	okReq := DivinationYunshiRequest{Type: "0", TitleYunshi: "3", Lang: "zh-cn", ParameterStyle: "chinese"}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := DivinationYunshiRequest{Type: "2", TitleYunshi: "3"}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestShengxiaoyunshiRequestValidate(t *testing.T) {
+	okReq := ShengxiaoyunshiRequest{TitleYunshi: "3", Lang: "en-us", ParameterStyle: "english"}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := ShengxiaoyunshiRequest{TitleYunshi: "12"}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestDivinationYunshiDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"运势类型":"白羊座","今日运势":{"速配星座":"处女座","提防星座":"狮子座","幸运颜色":"黄色","幸运数字":"73","幸运宝石":"草绿石","综合分数":"78","爱情分数":"65","事业分数":"85","心情分数":"73","交际分数":"81","财富分数":"76","健康分数":"87","今明运势":"a","爱情运势":"b","事业运势":"c","财富运势":"d","健康运势":"e"},"明日运势":{"速配星座":"双鱼座","提防星座":"摩羯座","今明运势":"x"},"本周运势":{"速配星座":"巨蟹座","本周运势":"w"},"本月运势":{"速配星座":"摩羯座","本月运势":"m"},"本年运势":{"速配星座":"巨蟹座","本年运势":"y"}}}`
+	var resp CommonResponse[DivinationYunshiData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal divination yunshi data failed: %v", err)
+	}
+	if resp.Data.FortuneType != "白羊座" || resp.Data.DailyFortune.LuckyColor != "黄色" || resp.Data.WeeklyFortune.WeeklyFortune != "w" {
+		t.Fatalf("unexpected yunshi data: %#v", resp.Data)
+	}
+}

@@ -8,15 +8,15 @@
 ## 1. 当前进度总览（已录入域）
 
 - 已录入总数：25
-- 已实现：17
+- 已实现：20
 - 进行中：0
-- 待实现：8
+- 待实现：5
 
 ```mermaid
 pie title free/bazi/zhanbu 三域接口覆盖
-    "done" : 17
+    "done" : 20
     "in_progress" : 0
-    "todo" : 8
+    "todo" : 5
 ```
 
 ---
@@ -41,7 +41,7 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | bazi | 生日论命 | Shengri | POST | /v1/Bazi/shengri | P2 | todo | typed struct | none |
 | bazi | 八字每日运势 | Yunshi | POST | /v1/Bazi/yunshi | P1 | done | typed struct | unit |
 | bazi | 流年财运分析 | Caiyunfenxi | POST | /v1/Bazi/caiyunfenxi | P1 | done | typed struct | unit |
-| zhanbu | 塔罗牌解读(新版) | Taluojiedu | POST | /v1/Zhanbu/taluojiedu | P1 | todo | typed struct | none |
+| zhanbu | 塔罗牌解读(新版) | Taluojiedu | POST | /v1/Zhanbu/taluojiedu | P1 | done | typed struct | unit |
 | zhanbu | 塔罗洗牌(旧版) | Taluoxipai | POST | /v1/Zhanbu/taluoxipai | P2 | todo | typed struct | none |
 | zhanbu | 一张牌占卜(旧版) | Taluozhanbu | POST | /v1/Zhanbu/taluozhanbu | P2 | todo | typed struct | none |
 | zhanbu | 多牌阵占卜(旧版) | Taluospreads | POST | /v1/Zhanbu/taluospreads | P2 | todo | typed struct | none |
@@ -49,8 +49,8 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | zhanbu | 指纹占卜 | Zhiwen | POST | /v1/Zhanbu/zhiwen | P1 | done | typed struct | unit |
 | zhanbu | 摇卦占卜 | Yaogua | POST | /v1/Zhanbu/yaogua | P1 | done | typed struct | unit |
 | zhanbu | 每日一占 | Meiri | POST | /v1/Zhanbu/meiri | P0 | done | typed struct | unit |
-| zhanbu | 星座每日运势 | Yunshi | POST | /v1/Zhanbu/yunshi | P1 | todo | typed struct | none |
-| zhanbu | 生肖每日运势 | Shengxiaoyunshi | POST | /v1/Zhanbu/shengxiaoyunshi | P1 | todo | typed struct | none |
+| zhanbu | 星座每日运势 | Yunshi | POST | /v1/Zhanbu/yunshi | P1 | done | typed struct | unit |
+| zhanbu | 生肖每日运势 | Shengxiaoyunshi | POST | /v1/Zhanbu/shengxiaoyunshi | P1 | done | typed struct | unit |
 
 ---
 
@@ -94,6 +94,6 @@ pie title free/bazi/zhanbu 三域接口覆盖
 
 ## 5. 下一步（执行顺序）
 
-1. Batch-1 继续实现：`zhanbu/taluojiedu`（P1）。
-2. Batch-1 继续实现：`zhanbu/yunshi`（P1）。
-3. Batch-1 继续实现：`zhanbu/shengxiaoyunshi`（P1）。
+1. Batch-1 继续实现：`zhanbu/taluoxipai`（P2）。
+2. Batch-1 继续实现：`zhanbu/taluozhanbu`（P2）。
+3. Batch-1 继续实现：`zhanbu/taluospreads`（P2）。
