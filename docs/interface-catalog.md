@@ -1,22 +1,22 @@
 # yuanfenju-go-sdk 接口台账（Interface Catalog）
 
 > 本文档作为“全接口对接”的单一事实源（Single Source of Truth）。
-> 当前已完成 `free/bazi/zhanbu` 三个域的 sitemap 全量录入（统计日期：2026-03-19）。
+> 当前已完成 `free/bazi/zhanbu` 三个域的 sitemap 全量录入（统计日期：2026-04-11）。
 
 状态定义：`todo` / `in_progress` / `done`。
 
 ## 1. 当前进度总览（已录入域）
 
-- 已录入总数：25
-- 已实现：20
+- 已录入总数：26
+- 已实现：23
 - 进行中：0
-- 待实现：5
+- 待实现：3
 
 ```mermaid
 pie title free/bazi/zhanbu 三域接口覆盖
-    "done" : 20
+    "done" : 23
     "in_progress" : 0
-    "todo" : 5
+    "todo" : 3
 ```
 
 ---
@@ -42,9 +42,9 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | bazi | 八字每日运势 | Yunshi | POST | /v1/Bazi/yunshi | P1 | done | typed struct | unit |
 | bazi | 流年财运分析 | Caiyunfenxi | POST | /v1/Bazi/caiyunfenxi | P1 | done | typed struct | unit |
 | zhanbu | 塔罗牌解读(新版) | Taluojiedu | POST | /v1/Zhanbu/taluojiedu | P1 | done | typed struct | unit |
-| zhanbu | 塔罗洗牌(旧版) | Taluoxipai | POST | /v1/Zhanbu/taluoxipai | P2 | todo | typed struct | none |
-| zhanbu | 一张牌占卜(旧版) | Taluozhanbu | POST | /v1/Zhanbu/taluozhanbu | P2 | todo | typed struct | none |
-| zhanbu | 多牌阵占卜(旧版) | Taluospreads | POST | /v1/Zhanbu/taluospreads | P2 | todo | typed struct | none |
+| zhanbu | 塔罗洗牌(旧版) | Taluoxipai | POST | /v1/Zhanbu/taluoxipai | P2 | done | typed struct | unit |
+| zhanbu | 一张牌占卜(旧版) | Taluozhanbu | POST | /v1/Zhanbu/taluozhanbu | P2 | done | typed struct | unit |
+| zhanbu | 多牌阵占卜(旧版) | Taluospreads | POST | /v1/Zhanbu/taluospreads | P2 | done | typed struct | unit |
 | zhanbu | 小六壬占卜 | Xiaoliuren | POST | /v1/Zhanbu/xiaoliuren | P1 | done | typed struct | unit |
 | zhanbu | 指纹占卜 | Zhiwen | POST | /v1/Zhanbu/zhiwen | P1 | done | typed struct | unit |
 | zhanbu | 摇卦占卜 | Yaogua | POST | /v1/Zhanbu/yaogua | P1 | done | typed struct | unit |
@@ -94,6 +94,6 @@ pie title free/bazi/zhanbu 三域接口覆盖
 
 ## 5. 下一步（执行顺序）
 
-1. Batch-1 继续实现：`zhanbu/taluoxipai`（P2）。
-2. Batch-1 继续实现：`zhanbu/taluozhanbu`（P2）。
-3. Batch-1 继续实现：`zhanbu/taluospreads`（P2）。
+1. Batch-1 继续实现：`bazi/chenggu`（P2）。
+2. Batch-1 继续实现：`bazi/guxiang`（P2）。
+3. Batch-1 继续实现：`bazi/shengri`（P2）。

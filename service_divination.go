@@ -2,8 +2,11 @@ package yuanfenju
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
+	"sort"
 	"strconv"
+	"strings"
 )
 
 var divinationAllowedLang = []string{"zh-cn", "en-us"}
@@ -12,6 +15,8 @@ var divinationYunshiAllowedLang = []string{"zh-cn", "zh-tw", "en-us"}
 var divinationYunshiAllowedType = []string{"0", "1"}
 var divinationYunshiAllowedParameterStyle = []string{"chinese", "english"}
 var taluojieduAllowedLang = []string{"zh-cn", "en-us", "zh-tw"}
+var taluoSpreadsAllowedRange = []string{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
+var taluoInverseAllowedValues = []string{"0", "1"}
 
 type DivinationService struct {
 	client *Client
@@ -284,6 +289,246 @@ type TaluojieduEnvironment struct {
 	TimeElement     string `json:"time_element"`
 }
 
+type TaluoxipaiRequest struct {
+	TaluoSpreads string // 1~9，默认 1
+}
+
+func (r TaluoxipaiRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.TaluoSpreads != "" {
+		v.Set("taluo_spreads", r.TaluoSpreads)
+	}
+	return v
+}
+
+func (r TaluoxipaiRequest) Validate() error {
+	if r.TaluoSpreads == "" {
+		return nil
+	}
+	if !inSet(r.TaluoSpreads, taluoSpreadsAllowedRange) {
+		return newEnumFieldError("taluo_spreads", r.TaluoSpreads, taluoSpreadsAllowedRange)
+	}
+	return nil
+}
+
+type TaluoxipaiData struct {
+	CardNos []int  `json:"-"`
+	Image   string `json:"image"`
+}
+
+func (d *TaluoxipaiData) UnmarshalJSON(data []byte) error {
+	var object map[string]json.RawMessage
+	if err := json.Unmarshal(data, &object); err != nil {
+		var numbers []int
+		if err2 := json.Unmarshal(data, &numbers); err2 == nil {
+			*d = TaluoxipaiData{CardNos: numbers}
+			return nil
+		}
+
+		var array []json.RawMessage
+		if err2 := json.Unmarshal(data, &array); err2 == nil && len(array) == 0 {
+			*d = TaluoxipaiData{}
+			return nil
+		}
+		return err
+	}
+
+	type cardPair struct {
+		Position int
+		CardNo   int
+	}
+
+	pairs := make([]cardPair, 0, len(object))
+	for k, v := range object {
+		if k == "image" {
+			if err := json.Unmarshal(v, &d.Image); err != nil {
+				return err
+			}
+			continue
+		}
+
+		position, err := strconv.Atoi(k)
+		if err != nil {
+			continue
+		}
+
+		var cardNo int
+		if err := json.Unmarshal(v, &cardNo); err != nil {
+			return err
+		}
+		pairs = append(pairs, cardPair{Position: position, CardNo: cardNo})
+	}
+
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i].Position < pairs[j].Position
+	})
+
+	d.CardNos = make([]int, 0, len(pairs))
+	for _, p := range pairs {
+		d.CardNos = append(d.CardNos, p.CardNo)
+	}
+
+	return nil
+}
+
+type TaluozhanbuRequest struct {
+	TaluoInverse string // 0 正位，1 逆位
+	Lang         string // zh-cn / en-us / zh-tw
+}
+
+func (r TaluozhanbuRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.TaluoInverse != "" {
+		v.Set("taluo_inverse", r.TaluoInverse)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r TaluozhanbuRequest) Validate() error {
+	if r.TaluoInverse != "" && !inSet(r.TaluoInverse, taluoInverseAllowedValues) {
+		return newEnumFieldError("taluo_inverse", r.TaluoInverse, taluoInverseAllowedValues)
+	}
+	if r.Lang != "" && !inSet(r.Lang, taluojieduAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, taluojieduAllowedLang)
+	}
+	return nil
+}
+
+type TaluozhanbuData struct {
+	CardName        string                  `json:"牌名"`
+	CardKeyword     string                  `json:"关键字"`
+	CardAstrology   string                  `json:"星相"`
+	CardElements    string                  `json:"四要素"`
+	CardDescription string                  `json:"牌面描述"`
+	UprightMeaning  TaluozhanbuMeaningBlock `json:"正位含义"`
+	ReverseMeaning  TaluozhanbuMeaningBlock `json:"逆位含义"`
+	Meaning         TaluozhanbuMeaningBlock `json:"含义"`
+	Orientation     string                  `json:"正逆"`
+	ID              int                     `json:"id"`
+	Image           string                  `json:"image"`
+}
+
+type TaluozhanbuMeaningBlock struct {
+	BaseMeaning         string `json:"基本含义"`
+	LoveMarriage        string `json:"恋爱婚姻"`
+	WorkStudy           string `json:"工作学业"`
+	InterpersonalWealth string `json:"人际财富"`
+	HealthLife          string `json:"健康生活"`
+	Other               string `json:"其它"`
+	Advice              string `json:"建议"`
+	LoveMarriageAdvice  string `json:"恋爱婚姻建议"`
+	WorkStudyAdvice     string `json:"工作学业建议"`
+	InterWealthAdvice   string `json:"人际财富建议"`
+	HealthLifeAdvice    string `json:"健康生活建议"`
+}
+
+type TaluospreadsRequest struct {
+	TaluoSpreads     string // 2~9
+	TaluoUserChecked string // 牌号列表，英文逗号分隔
+	Lang             string // zh-cn / en-us / zh-tw
+}
+
+func (r TaluospreadsRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.TaluoSpreads != "" {
+		v.Set("taluo_spreads", r.TaluoSpreads)
+	}
+	if r.TaluoUserChecked != "" {
+		v.Set("taluo_user_checked", r.TaluoUserChecked)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r TaluospreadsRequest) Validate() error {
+	if r.TaluoSpreads == "" {
+		return newRequiredFieldError("taluo_spreads")
+	}
+	spreads, err := strconv.Atoi(r.TaluoSpreads)
+	if err != nil {
+		return &ValidationError{Field: "taluo_spreads", Message: "must be a valid integer"}
+	}
+	if spreads < 2 || spreads > 9 {
+		return &ValidationError{Field: "taluo_spreads", Message: "must be in range [2, 9]"}
+	}
+
+	if r.TaluoUserChecked == "" {
+		return newRequiredFieldError("taluo_user_checked")
+	}
+
+	parts := strings.Split(r.TaluoUserChecked, ",")
+	cardNos := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		cardNos = append(cardNos, p)
+	}
+	if len(cardNos) != spreads {
+		return &ValidationError{
+			Field:   "taluo_user_checked",
+			Message: "count must match taluo_spreads",
+		}
+	}
+
+	for _, no := range cardNos {
+		cardNo, err := strconv.Atoi(no)
+		if err != nil {
+			return &ValidationError{
+				Field:   "taluo_user_checked",
+				Message: "must contain valid integers",
+			}
+		}
+		if cardNo < 0 || cardNo > 21 {
+			return &ValidationError{
+				Field:   "taluo_user_checked",
+				Message: "card number must be in range [0, 21]",
+			}
+		}
+	}
+
+	if r.Lang != "" && !inSet(r.Lang, taluojieduAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, taluojieduAllowedLang)
+	}
+	return nil
+}
+
+type TaluospreadsData struct {
+	Position string               `json:"position"`
+	Image    string               `json:"image"`
+	CardInfo TaluospreadsCardInfo `json:"card_info"`
+}
+
+type TaluospreadsCardInfo struct {
+	CardReverse     string                      `json:"cart_reverse"`
+	CardDescription TaluospreadsCardDescription `json:"card_description"`
+	CardName        string                      `json:"card_name"`
+	CardKeyword     string                      `json:"card_keyword"`
+	CardAstrology   string                      `json:"card_astrology"`
+	CardElements    string                      `json:"card_elements"`
+	CardSummarize   string                      `json:"card_summarize"`
+}
+
+type TaluospreadsCardDescription struct {
+	BaseDesc           string `json:"base_desc"`
+	LoveMarriage       string `json:"love_marriage"`
+	WorkStudy          string `json:"work_study"`
+	InterWealth        string `json:"inter_wealth"`
+	HealthLife         string `json:"health_life"`
+	Other              string `json:"other"`
+	Advice             string `json:"advice"`
+	LoveMarriageAdvice string `json:"love_marriage_advice"`
+	WorkStudyAdvice    string `json:"work_study_advice"`
+	InterWealthAdvice  string `json:"inter_wealth_advice"`
+	HealthLifeAdvice   string `json:"health_life_advice"`
+}
+
 type DivinationYunshiRequest struct {
 	Type           string // 0 星座，1 生肖
 	TitleYunshi    string // 0~11
@@ -477,6 +722,51 @@ func (s *DivinationService) Taluojiedu(ctx context.Context, req TaluojieduReques
 
 	resp := &CommonResponse[TaluojieduData]{}
 	if err := s.client.doForm(ctx, "/v1/Zhanbu/taluojiedu", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *DivinationService) Taluoxipai(ctx context.Context, req TaluoxipaiRequest) (*CommonResponse[TaluoxipaiData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[TaluoxipaiData]{}
+	if err := s.client.doForm(ctx, "/v1/Zhanbu/taluoxipai", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *DivinationService) Taluozhanbu(ctx context.Context, req TaluozhanbuRequest) (*CommonResponse[TaluozhanbuData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[TaluozhanbuData]{}
+	if err := s.client.doForm(ctx, "/v1/Zhanbu/taluozhanbu", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *DivinationService) Taluospreads(ctx context.Context, req TaluospreadsRequest) (*CommonResponse[[]TaluospreadsData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[[]TaluospreadsData]{}
+	if err := s.client.doForm(ctx, "/v1/Zhanbu/taluospreads", req.toValues(), resp); err != nil {
 		return nil, err
 	}
 	if resp.ErrCode != 0 {

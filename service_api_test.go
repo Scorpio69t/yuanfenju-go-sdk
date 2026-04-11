@@ -1041,6 +1041,128 @@ func TestDivinationTaluojiedu_HTTPError(t *testing.T) {
 	}
 }
 
+func TestDivinationTaluoxipai_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"0":21,"1":10,"2":14,"image":"https://yuanfenju.com/Public/img/taluo/back.jpg"}}`
+	client := newTestClient(t, "/v1/Zhanbu/taluoxipai", http.StatusOK, body)
+	resp, err := client.Divination.Taluoxipai(context.Background(), TaluoxipaiRequest{TaluoSpreads: "3"})
+	if err != nil {
+		t.Fatalf("taluoxipai failed: %v", err)
+	}
+	if len(resp.Data.CardNos) != 3 || resp.Data.CardNos[0] != 21 || resp.Data.Image == "" {
+		t.Fatalf("unexpected taluoxipai response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationTaluoxipai_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluoxipai", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Divination.Taluoxipai(context.Background(), TaluoxipaiRequest{TaluoSpreads: "3"})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationTaluoxipai_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluoxipai", http.StatusBadGateway, `bad gateway`)
+	_, err := client.Divination.Taluoxipai(context.Background(), TaluoxipaiRequest{TaluoSpreads: "3"})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 502") {
+		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestDivinationTaluozhanbu_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"牌名":"月亮 The Moon","关键字":"不安","星相":"双鱼座","四要素":"水","牌面描述":"desc","正位含义":{"基本含义":"a","建议":"b"},"逆位含义":{"基本含义":"c","建议":"d"},"含义":{"基本含义":"e","建议":"f"},"正逆":"正位","id":19,"image":"https://yuanfenju.com/Public/img/taluo/18.jpg"}}`
+	client := newTestClient(t, "/v1/Zhanbu/taluozhanbu", http.StatusOK, body)
+	resp, err := client.Divination.Taluozhanbu(context.Background(), TaluozhanbuRequest{
+		TaluoInverse: "0",
+		Lang:         "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("taluozhanbu failed: %v", err)
+	}
+	if resp.Data.CardName != "月亮 The Moon" || resp.Data.Orientation != "正位" || resp.Data.Meaning.Advice != "f" {
+		t.Fatalf("unexpected taluozhanbu response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationTaluozhanbu_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluozhanbu", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Divination.Taluozhanbu(context.Background(), TaluozhanbuRequest{
+		TaluoInverse: "0",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationTaluozhanbu_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluozhanbu", http.StatusServiceUnavailable, `unavailable`)
+	_, err := client.Divination.Taluozhanbu(context.Background(), TaluozhanbuRequest{
+		TaluoInverse: "0",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 503") {
+		t.Fatalf("expected http 503 error, got: %v", err)
+	}
+}
+
+func TestDivinationTaluospreads_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":[{"position":"第1号位牌信息","image":"https://yuanfenju.com/Public/img/taluo/0.jpg","card_info":{"cart_reverse":"逆位","card_description":{"base_desc":"a","advice":"b"},"card_name":"愚人 The Fool","card_keyword":"开始","card_astrology":"天王星","card_elements":"风","card_summarize":"desc"}},{"position":"第2号位牌信息","image":"https://yuanfenju.com/Public/img/taluo/19.jpg","card_info":{"cart_reverse":"正位","card_description":{"base_desc":"c","advice":"d"},"card_name":"太阳 The Sun","card_keyword":"希望","card_astrology":"太阳","card_elements":"火","card_summarize":"desc2"}}]}`
+	client := newTestClient(t, "/v1/Zhanbu/taluospreads", http.StatusOK, body)
+	resp, err := client.Divination.Taluospreads(context.Background(), TaluospreadsRequest{
+		TaluoSpreads:     "2",
+		TaluoUserChecked: "1,20",
+		Lang:             "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("taluospreads failed: %v", err)
+	}
+	if len(resp.Data) != 2 || resp.Data[0].CardInfo.CardName != "愚人 The Fool" || resp.Data[1].CardInfo.CardDescription.Advice != "d" {
+		t.Fatalf("unexpected taluospreads response: %#v", resp.Data)
+	}
+}
+
+func TestDivinationTaluospreads_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluospreads", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":[]}`)
+	_, err := client.Divination.Taluospreads(context.Background(), TaluospreadsRequest{
+		TaluoSpreads:     "2",
+		TaluoUserChecked: "1,20",
+	})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestDivinationTaluospreads_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Zhanbu/taluospreads", http.StatusBadRequest, `bad request`)
+	_, err := client.Divination.Taluospreads(context.Background(), TaluospreadsRequest{
+		TaluoSpreads:     "2",
+		TaluoUserChecked: "1,20",
+	})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 400") {
+		t.Fatalf("expected http 400 error, got: %v", err)
+	}
+}
+
 func TestDivinationYunshi_Success(t *testing.T) {
 	body := `{"errcode":0,"errmsg":"ok","data":{"运势类型":"白羊座","今日运势":{"速配星座":"处女座","综合分数":"78","今明运势":"today"},"明日运势":{"速配星座":"双鱼座","今明运势":"tomorrow"},"本周运势":{"速配星座":"巨蟹座","本周运势":"week"},"本月运势":{"速配星座":"摩羯座","本月运势":"month"},"本年运势":{"速配星座":"巨蟹座","本年运势":"year"}}}`
 	client := newTestClient(t, "/v1/Zhanbu/yunshi", http.StatusOK, body)

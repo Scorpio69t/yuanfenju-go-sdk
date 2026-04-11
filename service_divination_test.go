@@ -169,6 +169,95 @@ func TestTaluojieduDataUnmarshal(t *testing.T) {
 	}
 }
 
+func TestTaluoxipaiRequestValidate(t *testing.T) {
+	if err := (TaluoxipaiRequest{TaluoSpreads: "3"}).Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	err := (TaluoxipaiRequest{TaluoSpreads: "10"}).Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestTaluoxipaiDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"0":21,"1":10,"2":14,"image":"https://yuanfenju.com/Public/img/taluo/back.jpg"}}`
+	var resp CommonResponse[TaluoxipaiData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal taluoxipai data failed: %v", err)
+	}
+	if len(resp.Data.CardNos) != 3 || resp.Data.CardNos[0] != 21 || resp.Data.CardNos[2] != 14 {
+		t.Fatalf("unexpected card_nos: %#v", resp.Data.CardNos)
+	}
+	if resp.Data.Image == "" {
+		t.Fatalf("unexpected image: %s", resp.Data.Image)
+	}
+}
+
+func TestTaluozhanbuRequestValidate(t *testing.T) {
+	okReq := TaluozhanbuRequest{TaluoInverse: "0", Lang: "zh-cn"}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := TaluozhanbuRequest{TaluoInverse: "2", Lang: "zh-cn"}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestTaluozhanbuDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"牌名":"月亮 The Moon","关键字":"不安","星相":"双鱼座","四要素":"水","牌面描述":"desc","正位含义":{"基本含义":"a","建议":"b"},"逆位含义":{"基本含义":"c","建议":"d"},"含义":{"基本含义":"e","建议":"f"},"正逆":"正位","id":19,"image":"https://yuanfenju.com/Public/img/taluo/18.jpg"}}`
+	var resp CommonResponse[TaluozhanbuData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal taluozhanbu data failed: %v", err)
+	}
+	if resp.Data.CardName != "月亮 The Moon" || resp.Data.Orientation != "正位" || resp.Data.Meaning.Advice != "f" {
+		t.Fatalf("unexpected taluozhanbu data: %#v", resp.Data)
+	}
+}
+
+func TestTaluospreadsRequestValidate(t *testing.T) {
+	okReq := TaluospreadsRequest{
+		TaluoSpreads:     "3",
+		TaluoUserChecked: "1,20,9",
+		Lang:             "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := TaluospreadsRequest{
+		TaluoSpreads:     "3",
+		TaluoUserChecked: "1,20",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestTaluospreadsDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":[{"position":"第1号位牌信息","image":"https://yuanfenju.com/Public/img/taluo/0.jpg","card_info":{"cart_reverse":"逆位","card_description":{"base_desc":"a","advice":"b"},"card_name":"愚人 The Fool","card_keyword":"开始","card_astrology":"天王星","card_elements":"风","card_summarize":"desc"}}]}`
+	var resp CommonResponse[[]TaluospreadsData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal taluospreads data failed: %v", err)
+	}
+	if len(resp.Data) != 1 || resp.Data[0].CardInfo.CardName != "愚人 The Fool" || resp.Data[0].CardInfo.CardDescription.Advice != "b" {
+		t.Fatalf("unexpected taluospreads data: %#v", resp.Data)
+	}
+}
+
 func TestDivinationYunshiRequestValidate(t *testing.T) {
 	okReq := DivinationYunshiRequest{Type: "0", TitleYunshi: "3", Lang: "zh-cn", ParameterStyle: "chinese"}
 	if err := okReq.Validate(); err != nil {

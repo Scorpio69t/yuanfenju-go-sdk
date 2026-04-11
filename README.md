@@ -13,7 +13,7 @@
 - 前期内置关键接口：
   - 免费：账户查询、调用查询
   - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算、八字精盘、八字精算、未来运势、紫微排盘、八字每日运势、流年财运分析
-  - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜、塔罗牌解读（新版）、星座每日运势、生肖每日运势
+  - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜、塔罗牌解读（新版）、塔罗洗牌（旧版）、一张牌占卜（旧版）、多牌阵占卜（旧版）、星座每日运势、生肖每日运势
 
 ## 安装
 
@@ -81,8 +81,11 @@ flowchart LR
     D --> D3[Zhiwen]
     D --> D4[Yaogua]
     D --> D5[Taluojiedu]
-    D --> D6[Yunshi]
-    D --> D7[Shengxiaoyunshi]
+    D --> D6[Taluoxipai]
+    D --> D7[Taluozhanbu]
+    D --> D8[Taluospreads]
+    D --> D9[Yunshi]
+    D --> D10[Shengxiaoyunshi]
 ```
 
 ## 请求生命周期
@@ -122,6 +125,9 @@ sequenceDiagram
 | Divination | `client.Divination.Zhiwen` | `/v1/Zhanbu/zhiwen` |
 | Divination | `client.Divination.Yaogua` | `/v1/Zhanbu/yaogua` |
 | Divination | `client.Divination.Taluojiedu` | `/v1/Zhanbu/taluojiedu` |
+| Divination | `client.Divination.Taluoxipai` | `/v1/Zhanbu/taluoxipai` |
+| Divination | `client.Divination.Taluozhanbu` | `/v1/Zhanbu/taluozhanbu` |
+| Divination | `client.Divination.Taluospreads` | `/v1/Zhanbu/taluospreads` |
 | Divination | `client.Divination.Yunshi` | `/v1/Zhanbu/yunshi` |
 | Divination | `client.Divination.Shengxiaoyunshi` | `/v1/Zhanbu/yunshi` |
 
