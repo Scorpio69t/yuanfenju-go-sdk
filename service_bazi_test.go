@@ -756,3 +756,128 @@ func TestBaziCaiyunfenxiDataUnmarshal(t *testing.T) {
 		t.Fatalf("unexpected caiyunfenxi data: %#v", resp.Data)
 	}
 }
+
+func TestBaziChengguRequestValidate(t *testing.T) {
+	okReq := BaziChengguRequest{
+		Sex:    "1",
+		Type:   "1",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+		Lang:   "en-us",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziChengguRequest{
+		Sex:    "1",
+		Type:   "2",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziChengguDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"sex":"坤造","name":"张三","gongli":"1988年01月8日12时20分","nongli":"丁卯年 十一月 十九日 午时","qiyun":"0年8月6天起运","jiaoyun":"1988年9月10日20时30分57秒"},"chenggu":{"description":"早年谋事艰苦","total_weight":3.1,"liang":3,"qian":"1"}}}`
+	var resp CommonResponse[BaziChengguData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal chenggu data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "张三" || resp.Data.Chenggu.TotalWeight != "3.1" || resp.Data.Chenggu.Liang != 3 || resp.Data.Chenggu.Qian != 1 {
+		t.Fatalf("unexpected chenggu data: %#v", resp.Data)
+	}
+}
+
+func TestBaziGuxiangRequestValidate(t *testing.T) {
+	okReq := BaziGuxiangRequest{
+		Sex:    "0",
+		Type:   "0",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+		Lang:   "zh-cn",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziGuxiangRequest{
+		Sex:    "2",
+		Type:   "0",
+		Year:   "1988",
+		Month:  "11",
+		Day:    "8",
+		Hours:  "12",
+		Minute: "20",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziGuxiangDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"base_info":{"sex":"乾造","name":"李四","gongli":"1988年01月8日12时20分","nongli":"丁卯年 十一月 十九日 午时","qiyun":"0年8月6天起运","jiaoyun":"1988年9月10日20时30分57秒"},"guxiang":{"guxiang":"鱼骨","description":"此骨生来喜欢游"}}}`
+	var resp CommonResponse[BaziGuxiangData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal guxiang data failed: %v", err)
+	}
+	if resp.Data.BaseInfo.Name != "李四" || resp.Data.Guxiang.Guxiang != "鱼骨" {
+		t.Fatalf("unexpected guxiang data: %#v", resp.Data)
+	}
+}
+
+func TestBaziShengriRequestValidate(t *testing.T) {
+	okReq := BaziShengriRequest{
+		Year:  "1988",
+		Month: "1",
+		Day:   "8",
+		Lang:  "zh-tw",
+	}
+	if err := okReq.Validate(); err != nil {
+		t.Fatalf("expected valid request, got: %v", err)
+	}
+
+	badReq := BaziShengriRequest{
+		Year:  "1988",
+		Month: "1",
+		Day:   "8",
+		Lang:  "en-us",
+	}
+	err := badReq.Validate()
+	if err == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if !errors.Is(err, ErrValidation) {
+		t.Fatalf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestBaziShengriDataUnmarshal(t *testing.T) {
+	raw := `{"errcode":0,"errmsg":"ok","data":{"简介":"1月8日 潜力爆发","详情":"详细内容","幸运数字和守护星":"受数字8影响","健康":"注意休息","建议":"保持耐心","名人":"猫王","塔罗牌":"力量","静思语":"保持清醒","优点":"有趣","缺点":"压力过大","year":"1988","month":"1","day":"8"}}`
+	var resp CommonResponse[BaziShengriData]
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal shengri data failed: %v", err)
+	}
+	if resp.Data.Summary != "1月8日 潜力爆发" || resp.Data.Celebrity != "猫王" || resp.Data.Day != "8" {
+		t.Fatalf("unexpected shengri data: %#v", resp.Data)
+	}
+}

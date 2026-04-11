@@ -12,7 +12,7 @@
 - 支持 `context.Context`、自定义 `http.Client`、可配置 Base URL
 - 前期内置关键接口：
   - 免费：账户查询、调用查询
-  - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算、八字精盘、八字精算、未来运势、紫微排盘、八字每日运势、流年财运分析
+  - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算、八字精盘、八字精算、未来运势、紫微排盘、八字每日运势、流年财运分析、称骨论命、骨相论命、生日论命
   - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜、塔罗牌解读（新版）、塔罗洗牌（旧版）、一张牌占卜（旧版）、多牌阵占卜（旧版）、星座每日运势、生肖每日运势
 
 ## 安装
@@ -75,6 +75,9 @@ flowchart LR
     C --> C9[Zwpan]
     C --> C10[Yunshi]
     C --> C11[Caiyunfenxi]
+    C --> C12[Chenggu]
+    C --> C13[Guxiang]
+    C --> C14[Shengri]
 
     D --> D1[Meiri]
     D --> D2[Xiaoliuren]
@@ -120,6 +123,9 @@ sequenceDiagram
 | Bazi | `client.Bazi.Zwpan` | `/v1/Bazi/zwpan` |
 | Bazi | `client.Bazi.Yunshi` | `/v1/Bazi/yunshi` |
 | Bazi | `client.Bazi.Caiyunfenxi` | `/v1/Bazi/caiyunfenxi` |
+| Bazi | `client.Bazi.Chenggu` | `/v1/Bazi/chenggu` |
+| Bazi | `client.Bazi.Guxiang` | `/v1/Bazi/guxiang` |
+| Bazi | `client.Bazi.Shengri` | `/v1/Bazi/shengri` |
 | Divination | `client.Divination.Meiri` | `/v1/Zhanbu/meiri` |
 | Divination | `client.Divination.Xiaoliuren` | `/v1/Zhanbu/xiaoliuren` |
 | Divination | `client.Divination.Zhiwen` | `/v1/Zhanbu/zhiwen` |

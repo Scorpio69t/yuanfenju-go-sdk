@@ -8,15 +8,15 @@
 ## 1. 当前进度总览（已录入域）
 
 - 已录入总数：26
-- 已实现：23
+- 已实现：26
 - 进行中：0
-- 待实现：3
+- 待实现：0
 
 ```mermaid
 pie title free/bazi/zhanbu 三域接口覆盖
-    "done" : 23
+    "done" : 26
     "in_progress" : 0
-    "todo" : 3
+    "todo" : 0
 ```
 
 ---
@@ -36,9 +36,9 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | bazi | 八字精算 | Jingsuan | POST | /v1/Bazi/jingsuan | P1 | done | typed struct | unit |
 | bazi | 未来运势 | Weilai | POST | /v1/Bazi/weilai | P1 | done | typed struct | unit |
 | bazi | 紫微排盘 | Zwpan | POST | /v1/Bazi/zwpan | P1 | done | typed struct | unit |
-| bazi | 称骨论命 | Chenggu | POST | /v1/Bazi/chenggu | P2 | todo | typed struct | none |
-| bazi | 骨相论命 | Guxiang | POST | /v1/Bazi/guxiang | P2 | todo | typed struct | none |
-| bazi | 生日论命 | Shengri | POST | /v1/Bazi/shengri | P2 | todo | typed struct | none |
+| bazi | 称骨论命 | Chenggu | POST | /v1/Bazi/chenggu | P2 | done | typed struct | unit |
+| bazi | 骨相论命 | Guxiang | POST | /v1/Bazi/guxiang | P2 | done | typed struct | unit |
+| bazi | 生日论命 | Shengri | POST | /v1/Bazi/shengri | P2 | done | typed struct | unit |
 | bazi | 八字每日运势 | Yunshi | POST | /v1/Bazi/yunshi | P1 | done | typed struct | unit |
 | bazi | 流年财运分析 | Caiyunfenxi | POST | /v1/Bazi/caiyunfenxi | P1 | done | typed struct | unit |
 | zhanbu | 塔罗牌解读(新版) | Taluojiedu | POST | /v1/Zhanbu/taluojiedu | P1 | done | typed struct | unit |
@@ -94,6 +94,6 @@ pie title free/bazi/zhanbu 三域接口覆盖
 
 ## 5. 下一步（执行顺序）
 
-1. Batch-1 继续实现：`bazi/chenggu`（P2）。
-2. Batch-1 继续实现：`bazi/guxiang`（P2）。
-3. Batch-1 继续实现：`bazi/shengri`（P2）。
+1. Batch-2 启动：录入并实现 `tools` 域高频接口（P1）。
+2. Batch-2 启动：录入并实现 `peidui` 域高频接口（P1）。
+3. Batch-2 启动：按域补充示例与测试基线（unit/integration）。

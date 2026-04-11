@@ -3,6 +3,7 @@ package yuanfenju
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"time"
@@ -322,6 +323,37 @@ type BaziCaiyunfenxiRequest struct {
 	Latitude  string
 	Timezone  string
 	Lang      string // zh-cn / zh-tw / en-us
+}
+
+type BaziChengguRequest struct {
+	Name   string
+	Sex    string // 0 男，1 女
+	Type   string // 0 农历，1 公历
+	Year   string
+	Month  string
+	Day    string
+	Hours  string
+	Minute string
+	Lang   string // zh-cn / en-us / zh-tw
+}
+
+type BaziGuxiangRequest struct {
+	Name   string
+	Sex    string // 0 男，1 女
+	Type   string // 0 农历，1 公历
+	Year   string
+	Month  string
+	Day    string
+	Hours  string
+	Minute string
+	Lang   string // zh-cn / en-us / zh-tw
+}
+
+type BaziShengriRequest struct {
+	Year  string
+	Month string
+	Day   string
+	Lang  string // zh-cn / zh-tw
 }
 
 func (r BaziHepanRequest) toValues() url.Values {
@@ -1355,6 +1387,182 @@ func (r BaziCaiyunfenxiRequest) Validate() error {
 	return nil
 }
 
+func (r BaziChengguRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Name != "" {
+		v.Set("name", r.Name)
+	}
+	if r.Sex != "" {
+		v.Set("sex", r.Sex)
+	}
+	if r.Type != "" {
+		v.Set("type", r.Type)
+	}
+	if r.Year != "" {
+		v.Set("year", r.Year)
+	}
+	if r.Month != "" {
+		v.Set("month", r.Month)
+	}
+	if r.Day != "" {
+		v.Set("day", r.Day)
+	}
+	if r.Hours != "" {
+		v.Set("hours", r.Hours)
+	}
+	if r.Minute != "" {
+		v.Set("minute", r.Minute)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r BaziChengguRequest) Validate() error {
+	if r.Sex == "" {
+		return newRequiredFieldError("sex")
+	}
+	if !inSet(r.Sex, baziAllowedSex) {
+		return newEnumFieldError("sex", r.Sex, baziAllowedSex)
+	}
+
+	if r.Type == "" {
+		return newRequiredFieldError("type")
+	}
+	if !inSet(r.Type, cesuanAllowedType) {
+		return newEnumFieldError("type", r.Type, cesuanAllowedType)
+	}
+
+	required := []struct {
+		field string
+		value string
+	}{
+		{"year", r.Year},
+		{"month", r.Month},
+		{"day", r.Day},
+		{"hours", r.Hours},
+		{"minute", r.Minute},
+	}
+	for _, x := range required {
+		if x.value == "" {
+			return newRequiredFieldError(x.field)
+		}
+	}
+
+	if r.Lang != "" && !inSet(r.Lang, baziAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, baziAllowedLang)
+	}
+	return nil
+}
+
+func (r BaziGuxiangRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Name != "" {
+		v.Set("name", r.Name)
+	}
+	if r.Sex != "" {
+		v.Set("sex", r.Sex)
+	}
+	if r.Type != "" {
+		v.Set("type", r.Type)
+	}
+	if r.Year != "" {
+		v.Set("year", r.Year)
+	}
+	if r.Month != "" {
+		v.Set("month", r.Month)
+	}
+	if r.Day != "" {
+		v.Set("day", r.Day)
+	}
+	if r.Hours != "" {
+		v.Set("hours", r.Hours)
+	}
+	if r.Minute != "" {
+		v.Set("minute", r.Minute)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r BaziGuxiangRequest) Validate() error {
+	if r.Sex == "" {
+		return newRequiredFieldError("sex")
+	}
+	if !inSet(r.Sex, baziAllowedSex) {
+		return newEnumFieldError("sex", r.Sex, baziAllowedSex)
+	}
+
+	if r.Type == "" {
+		return newRequiredFieldError("type")
+	}
+	if !inSet(r.Type, cesuanAllowedType) {
+		return newEnumFieldError("type", r.Type, cesuanAllowedType)
+	}
+
+	required := []struct {
+		field string
+		value string
+	}{
+		{"year", r.Year},
+		{"month", r.Month},
+		{"day", r.Day},
+		{"hours", r.Hours},
+		{"minute", r.Minute},
+	}
+	for _, x := range required {
+		if x.value == "" {
+			return newRequiredFieldError(x.field)
+		}
+	}
+
+	if r.Lang != "" && !inSet(r.Lang, baziAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, baziAllowedLang)
+	}
+	return nil
+}
+
+func (r BaziShengriRequest) toValues() url.Values {
+	v := url.Values{}
+	if r.Year != "" {
+		v.Set("year", r.Year)
+	}
+	if r.Month != "" {
+		v.Set("month", r.Month)
+	}
+	if r.Day != "" {
+		v.Set("day", r.Day)
+	}
+	if r.Lang != "" {
+		v.Set("lang", r.Lang)
+	}
+	return v
+}
+
+func (r BaziShengriRequest) Validate() error {
+	required := []struct {
+		field string
+		value string
+	}{
+		{"year", r.Year},
+		{"month", r.Month},
+		{"day", r.Day},
+	}
+	for _, x := range required {
+		if x.value == "" {
+			return newRequiredFieldError(x.field)
+		}
+	}
+
+	if r.Lang != "" && !inSet(r.Lang, zwpanAllowedLang) {
+		return newEnumFieldError("lang", r.Lang, zwpanAllowedLang)
+	}
+	return nil
+}
+
 func (r BaziHehunRequest) toValues() url.Values {
 	v := url.Values{}
 	if r.MaleName != "" {
@@ -1833,6 +2041,137 @@ type BaziCaiyunfenxiData struct {
 	BaseInfo   BaziCaiyunfenxiBaseInfo `json:"base_info"`
 	BaziInfo   BaziInfo                `json:"bazi_info"`
 	CaiyunInfo BaziCaiyunfenxiInfo     `json:"caiyun_info"`
+}
+
+type BaziTraditionalBaseInfo struct {
+	Sex     string `json:"sex"`
+	Name    string `json:"name"`
+	Gongli  string `json:"gongli"`
+	Nongli  string `json:"nongli"`
+	Qiyun   string `json:"qiyun"`
+	Jiaoyun string `json:"jiaoyun"`
+}
+
+type BaziChengguData struct {
+	BaseInfo BaziTraditionalBaseInfo `json:"base_info"`
+	Chenggu  BaziChengguInfo         `json:"chenggu"`
+}
+
+type BaziChengguInfo struct {
+	Description string `json:"description"`
+	TotalWeight string `json:"total_weight"`
+	Liang       int    `json:"liang"`
+	Qian        int    `json:"qian"`
+}
+
+func (d *BaziChengguInfo) UnmarshalJSON(data []byte) error {
+	type rawPayload struct {
+		Description json.RawMessage `json:"description"`
+		TotalWeight json.RawMessage `json:"total_weight"`
+		Liang       json.RawMessage `json:"liang"`
+		Qian        json.RawMessage `json:"qian"`
+	}
+
+	var raw rawPayload
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	description, err := parseJSONStringOrNumber(raw.Description)
+	if err != nil {
+		return fmt.Errorf("description: %w", err)
+	}
+	totalWeight, err := parseJSONStringOrNumber(raw.TotalWeight)
+	if err != nil {
+		return fmt.Errorf("total_weight: %w", err)
+	}
+	liang, err := parseJSONInt(raw.Liang)
+	if err != nil {
+		return fmt.Errorf("liang: %w", err)
+	}
+	qian, err := parseJSONInt(raw.Qian)
+	if err != nil {
+		return fmt.Errorf("qian: %w", err)
+	}
+
+	*d = BaziChengguInfo{
+		Description: description,
+		TotalWeight: totalWeight,
+		Liang:       liang,
+		Qian:        qian,
+	}
+	return nil
+}
+
+type BaziGuxiangData struct {
+	BaseInfo BaziTraditionalBaseInfo `json:"base_info"`
+	Guxiang  BaziGuxiangInfo         `json:"guxiang"`
+}
+
+type BaziGuxiangInfo struct {
+	Guxiang     string `json:"guxiang"`
+	Description string `json:"description"`
+}
+
+type BaziShengriData struct {
+	Summary                 string `json:"简介"`
+	Detail                  string `json:"详情"`
+	LuckyNumbersAndGuardian string `json:"幸运数字和守护星"`
+	Health                  string `json:"健康"`
+	Advice                  string `json:"建议"`
+	Celebrity               string `json:"名人"`
+	TarotCard               string `json:"塔罗牌"`
+	Motto                   string `json:"静思语"`
+	Strengths               string `json:"优点"`
+	Weaknesses              string `json:"缺点"`
+	Year                    string `json:"year"`
+	Month                   string `json:"month"`
+	Day                     string `json:"day"`
+}
+
+func parseJSONStringOrNumber(raw json.RawMessage) (string, error) {
+	if len(raw) == 0 {
+		return "", nil
+	}
+
+	var s string
+	if err := json.Unmarshal(raw, &s); err == nil {
+		return s, nil
+	}
+
+	var n float64
+	if err := json.Unmarshal(raw, &n); err == nil {
+		return strconv.FormatFloat(n, 'f', -1, 64), nil
+	}
+
+	return "", fmt.Errorf("must be string or number")
+}
+
+func parseJSONInt(raw json.RawMessage) (int, error) {
+	if len(raw) == 0 {
+		return 0, nil
+	}
+
+	var i int
+	if err := json.Unmarshal(raw, &i); err == nil {
+		return i, nil
+	}
+
+	var s string
+	if err := json.Unmarshal(raw, &s); err == nil {
+		i, err := strconv.Atoi(s)
+		if err != nil {
+			return 0, fmt.Errorf("must be a valid integer string")
+		}
+		return i, nil
+	}
+
+	var f float64
+	if err := json.Unmarshal(raw, &f); err == nil {
+		return int(f), nil
+	}
+
+	return 0, fmt.Errorf("must be integer-compatible")
 }
 
 type BaziZwpanBaseInfo struct {
@@ -2513,6 +2852,51 @@ func (s *BaziService) Caiyunfenxi(ctx context.Context, req BaziCaiyunfenxiReques
 
 	resp := &CommonResponse[BaziCaiyunfenxiData]{}
 	if err := s.client.doForm(ctx, "/v1/Bazi/caiyunfenxi", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *BaziService) Chenggu(ctx context.Context, req BaziChengguRequest) (*CommonResponse[BaziChengguData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[BaziChengguData]{}
+	if err := s.client.doForm(ctx, "/v1/Bazi/chenggu", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *BaziService) Guxiang(ctx context.Context, req BaziGuxiangRequest) (*CommonResponse[BaziGuxiangData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[BaziGuxiangData]{}
+	if err := s.client.doForm(ctx, "/v1/Bazi/guxiang", req.toValues(), resp); err != nil {
+		return nil, err
+	}
+	if resp.ErrCode != 0 {
+		return nil, &APIError{Code: resp.ErrCode, Message: resp.ErrMsg, Notice: resp.Notice}
+	}
+	return resp, nil
+}
+
+func (s *BaziService) Shengri(ctx context.Context, req BaziShengriRequest) (*CommonResponse[BaziShengriData], error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	resp := &CommonResponse[BaziShengriData]{}
+	if err := s.client.doForm(ctx, "/v1/Bazi/shengri", req.toValues(), resp); err != nil {
 		return nil, err
 	}
 	if resp.ErrCode != 0 {
