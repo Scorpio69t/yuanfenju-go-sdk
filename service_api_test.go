@@ -994,6 +994,120 @@ func TestBaziShengri_HTTPError(t *testing.T) {
 	}
 }
 
+func TestToolsQq_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"desc":"云开见月","xiongji":"吉","desc1":"","score":"95","data":323366223,"shuli":39}}`
+	client := newTestClient(t, "/v1/Jixiong/qq", http.StatusOK, body)
+	resp, err := client.Tools.Qq(context.Background(), ToolsQqRequest{
+		Qq:   "323366223",
+		Lang: "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("tools qq failed: %v", err)
+	}
+	if resp.Data.InputData != "323366223" || resp.Data.Score != "95" || resp.Data.Shuli != 39 {
+		t.Fatalf("unexpected tools qq response: %#v", resp.Data)
+	}
+}
+
+func TestToolsQq_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Jixiong/qq", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Tools.Qq(context.Background(), ToolsQqRequest{Qq: "323366223"})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestToolsQq_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Jixiong/qq", http.StatusBadGateway, `bad gateway`)
+	_, err := client.Tools.Qq(context.Background(), ToolsQqRequest{Qq: "323366223"})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 502") {
+		t.Fatalf("expected http 502 error, got: %v", err)
+	}
+}
+
+func TestToolsShouji_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"desc":"吉祥号码","xiongji":"吉","desc1":"","score":"90","data":"13800138000","shuli":31}}`
+	client := newTestClient(t, "/v1/Jixiong/shouji", http.StatusOK, body)
+	resp, err := client.Tools.Shouji(context.Background(), ToolsShoujiRequest{
+		Shouji: "13800138000",
+		Lang:   "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("tools shouji failed: %v", err)
+	}
+	if resp.Data.InputData != "13800138000" || resp.Data.Score != "90" || resp.Data.Shuli != 31 {
+		t.Fatalf("unexpected tools shouji response: %#v", resp.Data)
+	}
+}
+
+func TestToolsShouji_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Jixiong/shouji", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Tools.Shouji(context.Background(), ToolsShoujiRequest{Shouji: "13800138000"})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestToolsShouji_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Jixiong/shouji", http.StatusServiceUnavailable, `unavailable`)
+	_, err := client.Tools.Shouji(context.Background(), ToolsShoujiRequest{Shouji: "13800138000"})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 503") {
+		t.Fatalf("expected http 503 error, got: %v", err)
+	}
+}
+
+func TestToolsShuzi_Success(t *testing.T) {
+	body := `{"errcode":0,"errmsg":"ok","data":{"desc":"数字吉","xiongji":"吉","desc1":"","score":"88","data":8888,"shuli":22}}`
+	client := newTestClient(t, "/v1/Jixiong/shuzi", http.StatusOK, body)
+	resp, err := client.Tools.Shuzi(context.Background(), ToolsShuziRequest{
+		Shuzi: "8888",
+		Lang:  "zh-cn",
+	})
+	if err != nil {
+		t.Fatalf("tools shuzi failed: %v", err)
+	}
+	if resp.Data.InputData != "8888" || resp.Data.Score != "88" || resp.Data.Shuli != 22 {
+		t.Fatalf("unexpected tools shuzi response: %#v", resp.Data)
+	}
+}
+
+func TestToolsShuzi_APIError(t *testing.T) {
+	client := newTestClient(t, "/v1/Jixiong/shuzi", http.StatusOK, `{"errcode":-1,"errmsg":"bad request","notice":"n","data":{}}`)
+	_, err := client.Tools.Shuzi(context.Background(), ToolsShuziRequest{Shuzi: "8888"})
+	if err == nil {
+		t.Fatal("expected API error, got nil")
+	}
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got: %v", err)
+	}
+}
+
+func TestToolsShuzi_HTTPError(t *testing.T) {
+	client := newTestClient(t, "/v1/Jixiong/shuzi", http.StatusBadRequest, `bad request`)
+	_, err := client.Tools.Shuzi(context.Background(), ToolsShuziRequest{Shuzi: "8888"})
+	if err == nil {
+		t.Fatal("expected HTTP error, got nil")
+	}
+	if !strings.Contains(err.Error(), "http 400") {
+		t.Fatalf("expected http 400 error, got: %v", err)
+	}
+}
+
 func TestDivinationMeiri_Success(t *testing.T) {
 	body := `{"errcode":0,"errmsg":"ok","data":{"number":777,"guaming":"大安","description":{"卦曰":"a"}}}`
 	client := newTestClient(t, "/v1/Zhanbu/meiri", http.StatusOK, body)

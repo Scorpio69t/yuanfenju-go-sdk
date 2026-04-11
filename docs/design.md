@@ -18,6 +18,7 @@ flowchart TB
         S1[FreeService]
         S2[BaziService]
         S3[DivinationService]
+        S4[ToolsService]
         M[Models]
 
         C --> T
@@ -25,9 +26,11 @@ flowchart TB
         C --> S1
         C --> S2
         C --> S3
+        C --> S4
         S1 --> M
         S2 --> M
         S3 --> M
+        S4 --> M
     end
 
     U[User Application] --> C
@@ -42,6 +45,7 @@ flowchart TB
 ├── service_free.go      # 免费接口（账户查询、调用查询）
 ├── service_bazi.go      # 八字接口（八字排盘）
 ├── service_divination.go# 占卜接口（每日一占）
+├── service_tools.go     # 数理接口（QQ/手机/数字测吉凶）
 ├── examples/
 │   └── basic/main.go    # 最小可运行示例
 ├── docs/

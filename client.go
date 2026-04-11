@@ -29,6 +29,7 @@ type Client struct {
 	Free       *FreeService
 	Bazi       *BaziService
 	Divination *DivinationService
+	Tools      *ToolsService
 }
 
 func NewClient(cfg Config) (*Client, error) {
@@ -60,6 +61,7 @@ func NewClient(cfg Config) (*Client, error) {
 	c.Free = &FreeService{client: c}
 	c.Bazi = &BaziService{client: c}
 	c.Divination = &DivinationService{client: c}
+	c.Tools = &ToolsService{client: c}
 
 	return c, nil
 }

@@ -7,21 +7,21 @@
 
 ## 1. 当前进度总览（已录入域）
 
-- 已录入总数：26
-- 已实现：26
+- 已录入总数：29
+- 已实现：29
 - 进行中：0
 - 待实现：0
 
 ```mermaid
-pie title free/bazi/zhanbu 三域接口覆盖
-    "done" : 26
+pie title free/bazi/zhanbu/tools 四域接口覆盖
+    "done" : 29
     "in_progress" : 0
     "todo" : 0
 ```
 
 ---
 
-## 2. 接口明细（free/bazi/zhanbu）
+## 2. 接口明细（free/bazi/zhanbu/tools）
 
 | domain | name_cn | method_name | http_method | path | priority | status | response_typed | test_status |
 |---|---|---|---|---|---|---|---|---|
@@ -51,6 +51,9 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | zhanbu | 每日一占 | Meiri | POST | /v1/Zhanbu/meiri | P0 | done | typed struct | unit |
 | zhanbu | 星座每日运势 | Yunshi | POST | /v1/Zhanbu/yunshi | P1 | done | typed struct | unit |
 | zhanbu | 生肖每日运势 | Shengxiaoyunshi | POST | /v1/Zhanbu/shengxiaoyunshi | P1 | done | typed struct | unit |
+| tools | QQ号测吉凶 | Qq | POST | /v1/Jixiong/qq | P1 | done | typed struct | unit |
+| tools | 手机测吉凶 | Shouji | POST | /v1/Jixiong/shouji | P1 | done | typed struct | unit |
+| tools | 数字测吉凶 | Shuzi | POST | /v1/Jixiong/shuzi | P1 | done | typed struct | unit |
 
 ---
 
@@ -61,7 +64,7 @@ pie title free/bazi/zhanbu 三域接口覆盖
 | free | done | sitemap 录入完成 |
 | bazi | done | sitemap 录入完成 |
 | zhanbu | done | sitemap 录入完成 |
-| tools | todo | 待录入 |
+| tools | in_progress | 已录入并实现首批高频接口（qq/shouji/shuzi） |
 | peidui | todo | 待录入 |
 | yuce | todo | 待录入 |
 | xingming | todo | 待录入 |
@@ -94,6 +97,6 @@ pie title free/bazi/zhanbu 三域接口覆盖
 
 ## 5. 下一步（执行顺序）
 
-1. Batch-2 启动：录入并实现 `tools` 域高频接口（P1）。
-2. Batch-2 启动：录入并实现 `peidui` 域高频接口（P1）。
-3. Batch-2 启动：按域补充示例与测试基线（unit/integration）。
+1. Batch-2 继续实现：`tools/guhua`（P1）。
+2. Batch-2 继续实现：`tools/shenfenzheng`（P1）。
+3. Batch-2 继续实现：`tools/chepai`（P1）。

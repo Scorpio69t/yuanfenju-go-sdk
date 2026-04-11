@@ -6,7 +6,7 @@
 
 ## 特性
 
-- 面向 `Service` 的现代化 SDK 结构（`client.Free` / `client.Bazi` / `client.Divination`）
+- 面向 `Service` 的现代化 SDK 结构（`client.Free` / `client.Bazi` / `client.Divination` / `client.Tools`）
 - 统一请求入口、统一错误模型、统一响应结构
 - 返回数据使用结构体建模（避免 `map` / `json.RawMessage` 动态结构）
 - 支持 `context.Context`、自定义 `http.Client`、可配置 Base URL
@@ -14,6 +14,7 @@
   - 免费：账户查询、调用查询
   - 八字：八字排盘、九星命理、八字合婚、八字合盘、八字测算、八字精盘、八字精算、未来运势、紫微排盘、八字每日运势、流年财运分析、称骨论命、骨相论命、生日论命
   - 占卜：每日一占、小六壬占卜、指纹占卜、摇卦占卜、塔罗牌解读（新版）、塔罗洗牌（旧版）、一张牌占卜（旧版）、多牌阵占卜（旧版）、星座每日运势、生肖每日运势
+  - 数理：QQ号测吉凶、手机测吉凶、数字测吉凶
 
 ## 安装
 
@@ -60,6 +61,7 @@ flowchart LR
     A[Client] --> B[FreeService]
     A --> C[BaziService]
     A --> D[DivinationService]
+    A --> E[ToolsService]
 
     B --> B1[QueryMerchant]
     B --> B2[QueryTimes]
@@ -89,6 +91,10 @@ flowchart LR
     D --> D8[Taluospreads]
     D --> D9[Yunshi]
     D --> D10[Shengxiaoyunshi]
+
+    E --> E1[Qq]
+    E --> E2[Shouji]
+    E --> E3[Shuzi]
 ```
 
 ## 请求生命周期
@@ -136,6 +142,9 @@ sequenceDiagram
 | Divination | `client.Divination.Taluospreads` | `/v1/Zhanbu/taluospreads` |
 | Divination | `client.Divination.Yunshi` | `/v1/Zhanbu/yunshi` |
 | Divination | `client.Divination.Shengxiaoyunshi` | `/v1/Zhanbu/yunshi` |
+| Tools | `client.Tools.Qq` | `/v1/Jixiong/qq` |
+| Tools | `client.Tools.Shouji` | `/v1/Jixiong/shouji` |
+| Tools | `client.Tools.Shuzi` | `/v1/Jixiong/shuzi` |
 
 ## 扩展路线
 
